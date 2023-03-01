@@ -4,6 +4,7 @@ use std::fs::read_to_string;
 use std::path::PathBuf;
 
 mod lexer;
+mod lua_transpiler;
 mod parser;
 mod position;
 mod range;
