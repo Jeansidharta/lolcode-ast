@@ -1,0 +1,38 @@
+use std::collections::VecDeque;
+
+use crate::lexer::Token;
+use crate::parser::types::{ASTErrorType, ASTNode};
+use crate::parser::StatementIterator;
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct Hai(VecDeque<Token>);
+
+impl Into<ASTNode> for Hai {
+    fn into(self) -> ASTNode {
+        ASTNode::HAI(self)
+    }
+}
+
+impl TryFrom<&mut StatementIterator> for Hai {
+    type Error = ASTErrorType;
+    fn try_from(tokens: &mut StatementIterator) -> Result<Self, Self::Error> {
+        Ok(Hai(tokens.next_statement()))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::lexer::{Keywords, NumberToken, TokenType, TokenValue};
+    use pretty_assertions::assert_eq;
+
+    #[test]
+    fn simple() {
+        let (_, tokens) = Token::chain_types(vec![
+            TokenType::Keyword(Keywords::HAI),
+            TokenType::Value(TokenValue::Number(NumberToken::Float(1.4))),
+        ]);
+
+        assert_eq!(Hai::try_from(&mut tokens.clone().into()), Ok(Hai(tokens)));
+    }
+}
