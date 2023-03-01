@@ -27,7 +27,7 @@ an [interpreter](https://github.com/justinmeza/lci) written in C.
 
 - `cargo build --release`
 
-- Your binary will be located at `./target/release/lolcode_parser`
+- Your binary will be located at `./target/release/lolcode_ast`
 
 ## Contributing
 
