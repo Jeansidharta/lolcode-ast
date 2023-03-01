@@ -1,7 +1,10 @@
 use crate::lexer::{Keywords, Token, TokenType};
-use crate::parser::expression::parse_expression;
 use crate::parser::expression::variable_access::parse_identifier;
-use crate::parser::types::{ASTErrorType, ASTExpression, ASTNode, ASTType, Identifier};
+use crate::parser::expression::ASTType;
+use crate::parser::expression::Identifier;
+use crate::parser::expression::{parse_expression, ASTExpression};
+use crate::parser::statements::ASTErrorType;
+use crate::parser::statements::ASTNode;
 use crate::parser::StatementIterator;
 
 #[derive(Debug, PartialEq, Clone)]
@@ -37,8 +40,8 @@ impl From<ASTType> for IHasAInitialValue {
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct IHasA {
-    identifier: Identifier,
-    initial_value: Option<IHasAInitialValue>,
+    pub identifier: Identifier,
+    pub initial_value: Option<IHasAInitialValue>,
 }
 
 impl TryFrom<(Token, &mut StatementIterator)> for IHasA {
@@ -117,7 +120,7 @@ impl Into<ASTNode> for IHasA {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{lexer::*, parser::types::ASTExpression};
+    use crate::lexer::*;
     use pretty_assertions::assert_eq;
 
     impl From<(Identifier, ASTExpression)> for IHasA {

@@ -1,8 +1,12 @@
-use crate::{position::Position, range::Range};
 pub use keywords::Keywords;
 use std::fmt::Debug;
 
 mod keywords;
+mod position;
+mod range;
+
+pub use position::Position;
+pub use range::Range;
 
 #[cfg(test)]
 mod tests;

@@ -1,11 +1,12 @@
 use crate::parser::expression::variable_access::parse_variable_access;
+use crate::parser::statements::ASTErrorType;
+use crate::parser::statements::ASTNode;
+use crate::parser::statements::VariableAccess;
 use crate::parser::StatementIterator;
 use std::collections::VecDeque;
 
 use crate::lexer::{Keywords, Token, TokenType};
-use crate::parser::expression::parse_expression;
-use crate::parser::types::{ASTErrorType, ASTExpression};
-use crate::parser::types::{ASTNode, VariableAccess};
+use crate::parser::expression::{parse_expression, ASTExpression};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct IIz {
@@ -82,10 +83,7 @@ mod tests {
     use std::rc::Rc;
 
     use super::*;
-    use crate::{
-        lexer::{Keywords, TokenType},
-        parser::types::ASTExpression,
-    };
+    use crate::lexer::{Keywords, TokenType};
     use pretty_assertions::assert_eq;
 
     #[test]

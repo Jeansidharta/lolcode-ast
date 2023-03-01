@@ -1,6 +1,8 @@
 use crate::lexer::{Keywords, Token, TokenType};
-use crate::parser::expression::parse_expression;
-use crate::parser::types::{ASTErrorType, ASTExpression, ASTNode, VariableAccess};
+use crate::parser::expression::{parse_expression, ASTExpression};
+use crate::parser::statements::ASTErrorType;
+use crate::parser::statements::ASTNode;
+use crate::parser::statements::VariableAccess;
 use crate::parser::StatementIterator;
 
 #[derive(Debug, Clone, PartialEq)]
@@ -56,7 +58,7 @@ impl Into<ASTErrorType> for VariableAssignmentError {
 
 #[cfg(test)]
 mod tests {
-    use crate::{lexer::*, parser::types::ASTExpression};
+    use crate::lexer::*;
     use pretty_assertions::assert_eq;
 
     use super::*;

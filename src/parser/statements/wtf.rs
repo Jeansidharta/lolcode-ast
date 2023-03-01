@@ -1,18 +1,18 @@
+use crate::parser::statements::ASTErrorType;
+use crate::parser::statements::ASTNode;
 use crate::parser::StatementIterator;
 use std::collections::VecDeque;
 
 use crate::lexer::{Keywords, Token, TokenType};
-use crate::parser::blocks::parse_block_switch;
-use crate::parser::expression::parse_expression;
-use crate::parser::types::ASTErrorType;
-use crate::parser::types::{ASTBlock, ASTExpression, ASTNode};
+use crate::parser::blocks::{parse_block_switch, ASTBlock};
+use crate::parser::expression::{parse_expression, ASTExpression};
 
 use super::o_rly::ORlyError;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Wtf {
-    omg: VecDeque<(ASTExpression, ASTBlock)>,
-    omg_wtf: Option<ASTBlock>,
+    pub omg: VecDeque<(ASTExpression, ASTBlock)>,
+    pub omg_wtf: Option<ASTBlock>,
 }
 
 impl TryFrom<(Token, &mut StatementIterator)> for Wtf {
@@ -76,7 +76,7 @@ mod tests {
     use super::*;
     use crate::{
         lexer::{Keywords, TokenType, TokenValue},
-        parser::{statements::visible::Visible, types::ASTExpression},
+        parser::statements::visible::Visible,
     };
     use pretty_assertions::assert_eq;
 

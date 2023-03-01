@@ -1,7 +1,7 @@
 use crate::lexer::Token;
 use crate::parser::expression::parse_expression;
-use crate::parser::types::ASTErrorType;
-use crate::parser::types::ASTNode;
+use crate::parser::statements::ASTErrorType;
+use crate::parser::statements::ASTNode;
 use crate::parser::StatementIterator;
 
 pub fn parse_found_yr(
@@ -22,7 +22,7 @@ mod tests {
     use super::*;
     use crate::{
         lexer::{Keywords, TokenType},
-        parser::types::{ASTErrorType, ASTExpression},
+        parser::expression::ASTExpression,
     };
     use pretty_assertions::assert_eq;
 

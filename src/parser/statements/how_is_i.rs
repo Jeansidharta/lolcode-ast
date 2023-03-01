@@ -1,11 +1,12 @@
 use crate::parser::expression::variable_access::parse_identifier;
+use crate::parser::statements::ASTErrorType;
+use crate::parser::statements::ASTNode;
+use crate::parser::Identifier;
 use crate::parser::StatementIterator;
 use std::collections::VecDeque;
 
 use crate::lexer::{Keywords, Token, TokenType};
-use crate::parser::blocks::parse_block_function;
-use crate::parser::types::{ASTBlock, ASTErrorType};
-use crate::parser::types::{ASTNode, Identifier};
+use crate::parser::blocks::{parse_block_function, ASTBlock};
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct HowIzI {
@@ -92,7 +93,7 @@ mod tests {
     use super::*;
     use crate::{
         lexer::{Keywords, TokenType, TokenValue},
-        parser::{statements::visible::Visible, types::ASTExpression},
+        parser::{expression::ASTExpression, statements::visible::Visible},
     };
     use pretty_assertions::assert_eq;
 

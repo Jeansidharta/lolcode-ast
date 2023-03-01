@@ -1,10 +1,10 @@
+use crate::parser::statements::ASTErrorType;
+use crate::parser::statements::ASTNode;
 use crate::parser::StatementIterator;
 use std::collections::VecDeque;
 
 use crate::lexer::{Keywords, Token, TokenType};
-use crate::parser::blocks::parse_block_if;
-use crate::parser::types::ASTErrorType;
-use crate::parser::types::{ASTBlock, ASTNode};
+use crate::parser::blocks::{parse_block_if, ASTBlock};
 
 #[derive(Clone, PartialEq, Debug)]
 pub struct ORly {
@@ -94,7 +94,7 @@ mod tests {
     use super::*;
     use crate::{
         lexer::{Keywords, NumberToken, TokenType, TokenValue},
-        parser::{statements::visible::Visible, types::ASTExpression},
+        parser::{expression::ASTExpression, statements::visible::Visible},
     };
     use pretty_assertions::assert_eq;
 

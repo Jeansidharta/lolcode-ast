@@ -1,15 +1,36 @@
-use crate::{
-    lexer::Keywords,
-    parser::{types::Identifier, StatementIterator},
-};
+use crate::lexer::Keywords;
+use crate::parser::statements::error_type::ASTErrorType;
+use crate::parser::Identifier;
+use crate::parser::StatementIterator;
 use std::collections::VecDeque;
 
-use crate::{
-    lexer::{Token, TokenType},
-    parser::types::{ASTErrorType, VariableAccess},
-};
+use crate::lexer::{Token, TokenType};
 
-pub fn parse_identifier(
+#[derive(Debug, PartialEq, Clone)]
+pub struct VariableAccess {
+    pub name: Identifier,
+    pub accesses: VecDeque<Identifier>,
+}
+
+impl VariableAccess {
+    pub(crate) fn last_token(mut self) -> Token {
+        self.accesses
+            .pop_back()
+            .map(|ident| ident.name)
+            .unwrap_or_else(|| self.name.name)
+    }
+}
+
+impl<const T: usize> From<((Token, bool), [(Token, bool); T])> for VariableAccess {
+    fn from((name, accesses): ((Token, bool), [(Token, bool); T])) -> Self {
+        VariableAccess {
+            name: name.into(),
+            accesses: accesses.into_iter().map(|a| a.into()).collect(),
+        }
+    }
+}
+
+pub(crate) fn parse_identifier(
     first_token: Token,
     tokens: &mut StatementIterator,
 ) -> Result<Identifier, ASTErrorType> {
@@ -29,7 +50,7 @@ pub fn parse_identifier(
     }
 }
 
-pub fn parse_variable_access(
+pub(crate) fn parse_variable_access(
     first_token: Token,
     tokens: &mut StatementIterator,
 ) -> Result<VariableAccess, ASTErrorType> {
@@ -51,7 +72,7 @@ pub fn parse_variable_access(
     })
 }
 
-pub fn is_valid_variable_access(token: &Token) -> bool {
+pub(crate) fn is_valid_variable_access(token: &Token) -> bool {
     matches!(
         token.token_type,
         TokenType::Identifier(_) | TokenType::Keyword(Keywords::SRS)

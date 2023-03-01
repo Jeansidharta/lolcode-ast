@@ -1,8 +1,8 @@
-use crate::position::Position;
+use crate::lexer::Position;
 use std::fmt::Debug;
 
 #[derive(Clone)]
-pub struct Range(Position, Position);
+pub struct Range(pub Position, pub Position);
 
 impl From<(Position, Position)> for Range {
     fn from((start, end): (Position, Position)) -> Self {

@@ -1,7 +1,10 @@
 use crate::lexer::{Keywords, Token, TokenType};
-use crate::parser::expression::parse_expression;
 use crate::parser::expression::variable_access::parse_identifier;
-use crate::parser::types::{ASTErrorType, ASTExpression, ASTNode, Identifier, VariableAccess};
+use crate::parser::expression::Identifier;
+use crate::parser::expression::{parse_expression, ASTExpression};
+use crate::parser::statements::ASTErrorType;
+use crate::parser::statements::ASTNode;
+use crate::parser::statements::VariableAccess;
 use crate::parser::StatementIterator;
 
 use super::assignment::VariableAssignmentError;
@@ -73,7 +76,7 @@ impl Into<ASTNode> for BukkitSetSlot {
 #[cfg(test)]
 mod tests {
 
-    use crate::{lexer::*, parser::types::ASTExpression};
+    use crate::lexer::*;
     use pretty_assertions::assert_eq;
 
     use super::*;

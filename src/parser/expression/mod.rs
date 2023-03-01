@@ -1,12 +1,44 @@
-use super::types::{ASTErrorType, ASTExpression, ExpressionError};
 use crate::lexer::{Keywords, Token, TokenType};
+use crate::parser::statements::error_type::ASTErrorType;
 use crate::parser::StatementIterator;
 use std::{collections::VecDeque, rc::Rc};
 
 #[cfg(test)]
 mod tests;
 
-pub mod variable_access;
+pub(crate) mod identifier;
+pub(crate) mod variable_access;
+
+pub use identifier::{ASTType, Identifier};
+pub use variable_access::VariableAccess;
+
+#[derive(Debug, PartialEq, Clone)]
+pub enum ASTExpression {
+    LiteralValue(Token),
+    VariableAccess(VariableAccess),
+    BothOf(Rc<ASTExpression>, Rc<ASTExpression>),
+    EitherOf(Rc<ASTExpression>, Rc<ASTExpression>),
+    WonOf(Rc<ASTExpression>, Rc<ASTExpression>),
+    Not(Rc<ASTExpression>),
+    AllOf(VecDeque<ASTExpression>),
+    AnyOf(VecDeque<ASTExpression>),
+    SumOf(Rc<ASTExpression>, Rc<ASTExpression>),
+    DiffOf(Rc<ASTExpression>, Rc<ASTExpression>),
+    ProduktOf(Rc<ASTExpression>, Rc<ASTExpression>),
+    QuoshuntOf(Rc<ASTExpression>, Rc<ASTExpression>),
+    ModOf(Rc<ASTExpression>, Rc<ASTExpression>),
+    BiggrOf(Rc<ASTExpression>, Rc<ASTExpression>),
+    SmallrOf(Rc<ASTExpression>, Rc<ASTExpression>),
+    BothSaem(Rc<ASTExpression>, Rc<ASTExpression>),
+    Diffrint(Rc<ASTExpression>, Rc<ASTExpression>),
+    Smoosh(VecDeque<ASTExpression>),
+    Maek(Rc<ASTExpression>, Token),
+}
+
+#[derive(Debug, PartialEq, Clone)]
+pub enum ExpressionError {
+    MissingOperands(Token),
+}
 
 trait SwappableResult<T, U> {
     fn swap_ok_err(self) -> Result<U, T>;
@@ -21,7 +53,7 @@ impl<T, U> SwappableResult<T, U> for Result<T, U> {
     }
 }
 
-pub fn parse_expression(
+pub(crate) fn parse_expression(
     first_token: Token,
     tokens: &mut StatementIterator,
 ) -> Result<ASTExpression, ASTErrorType> {

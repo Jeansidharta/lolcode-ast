@@ -1,7 +1,7 @@
 use crate::lexer::Token;
 use crate::parser::expression::variable_access::parse_variable_access;
-use crate::parser::types::ASTErrorType;
-use crate::parser::types::ASTNode;
+use crate::parser::statements::ASTErrorType;
+use crate::parser::statements::ASTNode;
 use crate::parser::StatementIterator;
 
 pub fn parse_gimmeh(
@@ -19,40 +19,41 @@ pub fn parse_gimmeh(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{
-        lexer::{Keywords, TokenType, TokenValue::NOOB},
-        parser::types::ASTErrorType,
-    };
+    use crate::lexer::{Keywords, TokenType, TokenValue::NOOB};
     use pretty_assertions::assert_eq;
 
     #[test]
     fn simple() {
-        let keyword = Token::from(TokenType::Keyword(Keywords::GIMMEH));
-        let ident = &keyword + TokenType::Identifier("Batata".to_string());
+        let (keyword, tokens) = Token::chain_types(vec![
+            TokenType::Keyword(Keywords::GIMMEH),
+            TokenType::Identifier("Batata".to_string()),
+        ]);
 
         assert_eq!(
-            parse_gimmeh(keyword, &mut StatementIterator::new(vec![ident.clone()])),
-            Ok(ASTNode::Gimmeh(((ident.clone(), false), []).into()))
+            parse_gimmeh(keyword, &mut tokens.clone().into()),
+            Ok(ASTNode::Gimmeh(((tokens[0].clone(), false), []).into()))
         );
     }
 
     #[test]
     fn invalid_identifier() {
-        let keyword = Token::from(TokenType::Keyword(Keywords::GIMMEH));
-        let ident = &keyword + TokenType::Value(NOOB);
+        let (keyword, tokens) = Token::chain_types(vec![
+            TokenType::Keyword(Keywords::GIMMEH),
+            TokenType::Value(NOOB),
+        ]);
 
         assert_eq!(
-            parse_gimmeh(keyword, &mut StatementIterator::new(vec![ident.clone()])),
-            Err(ASTErrorType::UnexpectedToken(ident.clone()))
+            parse_gimmeh(keyword, &mut tokens.clone().into()),
+            Err(ASTErrorType::UnexpectedToken(tokens[0].clone()))
         );
     }
 
     #[test]
     fn missing_identifier() {
-        let keyword = Token::from(TokenType::Keyword(Keywords::GIMMEH));
+        let (keyword, tokens) = Token::chain_types(vec![TokenType::Keyword(Keywords::GIMMEH)]);
 
         assert_eq!(
-            parse_gimmeh(keyword.clone(), &mut StatementIterator::new(vec![])),
+            parse_gimmeh(keyword.clone(), &mut tokens.clone().into()),
             Err(ASTErrorType::MissingToken(keyword.clone()))
         );
     }

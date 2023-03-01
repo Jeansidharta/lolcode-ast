@@ -3,7 +3,7 @@ mod n_ary;
 mod unary;
 
 use super::*;
-use crate::{lexer::*, parser::types::VariableAccess};
+use crate::lexer::*;
 use pretty_assertions::assert_eq;
 
 #[test]

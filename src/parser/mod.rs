@@ -1,15 +1,45 @@
 use crate::lexer::Token;
 use statements::parse_statement;
 
-use self::{blocks::parse_block_root, statement_iterator::StatementIterator, types::ASTBlock};
+use self::{
+    blocks::parse_block_root, expression::Identifier, statement_iterator::StatementIterator,
+};
 
-pub mod blocks;
+pub use blocks::ASTBlock;
+
+mod blocks;
 pub mod expression;
-pub mod statement_iterator;
+mod statement_iterator;
 pub mod statements;
-pub mod types;
+
+impl From<(Token, bool)> for Identifier {
+    fn from((name, is_srs): (Token, bool)) -> Self {
+        Self { name, is_srs }
+    }
+}
 
 pub fn parse(tokens: Vec<Token>) -> ASTBlock {
     let mut line_iterator = StatementIterator::new(tokens);
     return parse_block_root(&mut line_iterator);
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::lexer::Keywords;
+    use crate::parser::expression::ASTType;
+
+    impl TryFrom<&Keywords> for ASTType {
+        type Error = ();
+        fn try_from(value: &Keywords) -> Result<Self, ()> {
+            match value {
+                Keywords::NUMBAR => Ok(Self::Numbar),
+                Keywords::NUMBR => Ok(Self::Numbr),
+                Keywords::TROOF => Ok(Self::Troof),
+                Keywords::YARN => Ok(Self::Yarn),
+                Keywords::NOOB => Ok(Self::Noob),
+                Keywords::BUKKIT => Ok(Self::Bukkit),
+                _ => Err(()),
+            }
+        }
+    }
 }

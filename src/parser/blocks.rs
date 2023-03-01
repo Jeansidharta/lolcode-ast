@@ -1,9 +1,40 @@
+use crate::parser::statements::ASTNode;
+use std::collections::VecDeque;
+use std::ops::{Deref, DerefMut};
+
 use crate::parser::StatementIterator;
 
 use crate::lexer::{Keywords, Token, TokenType};
 
 use super::parse_statement;
-use super::types::ASTBlock;
+
+#[derive(Debug, PartialEq, Clone)]
+pub struct ASTBlock(pub VecDeque<ASTNode>);
+
+impl ASTBlock {
+    pub fn new() -> Self {
+        Self(VecDeque::new())
+    }
+}
+
+impl<const T: usize> From<[ASTNode; T]> for ASTBlock {
+    fn from(value: [ASTNode; T]) -> Self {
+        Self(VecDeque::from(value))
+    }
+}
+
+impl Deref for ASTBlock {
+    type Target = VecDeque<ASTNode>;
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl DerefMut for ASTBlock {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
+}
 
 fn parse_block(
     statement_iterator: &mut StatementIterator,
@@ -67,13 +98,15 @@ pub fn parse_block_switch(statement_iterator: &mut StatementIterator) -> ASTBloc
 
 #[cfg(test)]
 mod tests {
+    use crate::parser::expression::VariableAccess;
     use std::{collections::VecDeque, rc::Rc};
 
     use crate::{
         lexer::{Keywords, TokenType, TokenValue},
         parser::{
+            expression::ASTExpression,
             statements::{assignment::VariableAssignment, i_has_a::IHasA, visible::Visible},
-            types::{ASTExpression, ASTNode, Identifier, VariableAccess},
+            Identifier,
         },
     };
 

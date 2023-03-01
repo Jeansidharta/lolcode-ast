@@ -2,8 +2,11 @@ use crate::lexer::{Keywords, Token, TokenType};
 use crate::parser::blocks::parse_block_loop;
 use crate::parser::expression::parse_expression;
 use crate::parser::expression::variable_access::parse_variable_access;
-use crate::parser::types::ASTErrorType;
-use crate::parser::types::{ASTBlock, ASTExpression, ASTNode, VariableAccess};
+use crate::parser::expression::VariableAccess;
+use crate::parser::statements::ASTErrorType;
+use crate::parser::statements::ASTExpression;
+use crate::parser::statements::ASTNode;
+use crate::parser::ASTBlock;
 use crate::parser::StatementIterator;
 
 #[derive(Debug, PartialEq, Clone)]
@@ -56,10 +59,10 @@ pub struct LoopIterationOperation {
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct ImInYr {
-    label: Token,
-    on_iteration: Option<LoopIterationOperation>,
-    code_block: ASTBlock,
-    end_label: Token,
+    pub label: Token,
+    pub on_iteration: Option<LoopIterationOperation>,
+    pub code_block: ASTBlock,
+    pub end_label: Token,
 }
 
 impl TryFrom<(Token, &mut &mut StatementIterator)> for LoopIterationOperation {
@@ -197,10 +200,7 @@ mod tests {
     use super::*;
     use crate::{
         lexer::{Keywords, NumberToken, TokenType, TokenValue},
-        parser::{
-            statements::{assignment::VariableAssignment, visible::Visible},
-            types::ASTExpression,
-        },
+        parser::statements::{assignment::VariableAssignment, visible::Visible},
     };
     use pretty_assertions::assert_eq;
 

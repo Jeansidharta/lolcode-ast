@@ -1,9 +1,10 @@
+use crate::parser::statements::ASTErrorType;
+use crate::parser::statements::ASTNode;
 use crate::parser::StatementIterator;
 use std::collections::VecDeque;
 
 use crate::lexer::{Token, TokenType};
-use crate::parser::expression::parse_expression;
-use crate::parser::types::{ASTErrorType, ASTExpression, ASTNode};
+use crate::parser::expression::{parse_expression, ASTExpression};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Visible(pub VecDeque<ASTExpression>, pub Option<Token>);

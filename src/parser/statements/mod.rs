@@ -1,5 +1,6 @@
 use self::assignment::VariableAssignment;
 use self::bukkit_set_slot::BukkitSetSlot;
+pub use self::error_type::ASTErrorType;
 use self::hai::Hai;
 use self::how_is_i::HowIzI;
 use self::i_has_a::IHasA;
@@ -9,14 +10,17 @@ use self::o_rly::ORly;
 use self::visible::Visible;
 use self::wtf::Wtf;
 
-use super::expression::parse_expression;
+use crate::parser::expression::parse_expression;
+
 use super::expression::variable_access::{is_valid_variable_access, parse_variable_access};
-use super::types::{ASTErrorType, ASTExpression, ASTNode};
+use super::expression::ASTExpression;
 use crate::lexer::{Keywords, Token, TokenType};
+use crate::parser::expression::VariableAccess;
 use crate::parser::StatementIterator;
 
 pub mod assignment;
 pub mod bukkit_set_slot;
+pub(crate) mod error_type;
 pub mod found_yr;
 pub mod gimmeh;
 pub mod gtfo;
@@ -29,6 +33,41 @@ pub mod kthxbye;
 pub mod o_rly;
 pub mod visible;
 pub mod wtf;
+
+#[derive(Debug, PartialEq, Clone)]
+pub enum ASTNode {
+    IHasA(IHasA),
+    HAI(Hai),
+    ImInYr(ImInYr),
+    BukkitSetSlot(BukkitSetSlot),
+    VariableAssignment(VariableAssignment),
+    Visible(Visible),
+    FoundYr(ASTExpression),
+    Wtf(Wtf),
+    ORly(ORly),
+    IIz(IIz),
+    HowIzI(HowIzI),
+    Gtfo(Token),
+    Gimmeh(VariableAccess),
+    Expression(ASTExpression),
+    ASTError(ASTErrorType),
+    KTHXBYE(Token),
+}
+
+impl<T: Into<ASTNode>> From<Result<T, ASTErrorType>> for ASTNode {
+    fn from(value: Result<T, ASTErrorType>) -> Self {
+        match value {
+            Err(err) => ASTNode::ASTError(err),
+            Ok(val) => val.into(),
+        }
+    }
+}
+
+impl From<ASTErrorType> for ASTNode {
+    fn from(value: ASTErrorType) -> Self {
+        ASTNode::ASTError(value)
+    }
+}
 
 pub fn parse_statement(
     first_token: Token,
