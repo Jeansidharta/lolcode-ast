@@ -32,7 +32,7 @@ an [interpreter](https://github.com/justinmeza/lci) written in C.
 ## Contributing
 
 This project is mainly for personal use, but I'll gladly accept pull requests,
-and read issues. For more information, read the [CONTRIBUTING](CONTRIBUTING)
+and read issues. For more information, read the [CONTRIBUTING](CONTRIBUTING.md)
 file.
 
 ## License
