@@ -26,12 +26,12 @@ fn complex_expressions() {
     assert_eq!(
         parse_expression(operation, &mut operands.clone().into()),
         Ok(ASTExpression::SumOf(
-            Rc::new(ASTExpression::Smoosh(VecDeque::from([
+            Box::new(ASTExpression::Smoosh(VecDeque::from([
                 ASTExpression::LiteralValue(operands.get(2).unwrap().clone()),
                 ASTExpression::LiteralValue(operands.get(4).unwrap().clone()),
                 ASTExpression::LiteralValue(operands.get(6).unwrap().clone()),
             ]))),
-            Rc::new(ASTExpression::Not(Rc::new(ASTExpression::LiteralValue(
+            Box::new(ASTExpression::Not(Box::new(ASTExpression::LiteralValue(
                 operands.get(10).unwrap().clone()
             )))),
         ))

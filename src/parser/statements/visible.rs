@@ -36,7 +36,6 @@ mod tests {
     use super::*;
     use crate::lexer::{Keywords, NumberToken::Int, Token, TokenValue};
     use pretty_assertions::assert_eq;
-    use std::rc::Rc;
 
     #[test]
     fn success_hello_world() {
@@ -121,18 +120,18 @@ mod tests {
                         [
                             ASTExpression::LiteralValue(tokens[1].clone()),
                             ASTExpression::SumOf(
-                                Rc::new(ASTExpression::LiteralValue(tokens[4].clone())),
-                                Rc::new(ASTExpression::LiteralValue(tokens[5].clone()))
+                                Box::new(ASTExpression::LiteralValue(tokens[4].clone())),
+                                Box::new(ASTExpression::LiteralValue(tokens[5].clone()))
                             ),
                             ASTExpression::VariableAccess(((tokens[6].clone(), false), []).into())
                         ]
                         .into()
                     ),
                     ASTExpression::EitherOf(
-                        Rc::new(ASTExpression::VariableAccess(
+                        Box::new(ASTExpression::VariableAccess(
                             ((tokens[9].clone(), false), []).into()
                         )),
-                        Rc::new(ASTExpression::LiteralValue(tokens[11].clone()))
+                        Box::new(ASTExpression::LiteralValue(tokens[11].clone()))
                     )
                 ]
                 .into(),

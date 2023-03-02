@@ -98,8 +98,6 @@ impl Into<ASTNode> for IIz {
 #[cfg(test)]
 mod tests {
 
-    use std::rc::Rc;
-
     use super::*;
     use crate::lexer::{Keywords, TokenType};
     use pretty_assertions::assert_eq;
@@ -152,10 +150,10 @@ mod tests {
                     ASTExpression::VariableAccess(((block_tokens[0][2].clone(), false), []).into()),
                     ASTExpression::VariableAccess(((block_tokens[0][5].clone(), false), []).into()),
                     ASTExpression::SumOf(
-                        Rc::new(ASTExpression::VariableAccess(
+                        Box::new(ASTExpression::VariableAccess(
                             ((block_tokens[0][9].clone(), false), []).into()
                         )),
-                        Rc::new(ASTExpression::LiteralValue(block_tokens[0][11].clone()))
+                        Box::new(ASTExpression::LiteralValue(block_tokens[0][11].clone()))
                     )
                 ]
                 .into()

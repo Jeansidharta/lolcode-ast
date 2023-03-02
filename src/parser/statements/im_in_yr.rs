@@ -284,7 +284,7 @@ impl Into<ASTNode> for ImInYr {
 #[cfg(test)]
 mod tests {
 
-    use std::{collections::VecDeque, rc::Rc};
+    use std::collections::VecDeque;
 
     use super::*;
     use crate::{
@@ -342,10 +342,10 @@ mod tests {
                     VariableAssignment {
                         identifier: ((block_tokens[2][0].clone(), false), []).into(),
                         value: ASTExpression::SumOf(
-                            Rc::new(ASTExpression::VariableAccess(
+                            Box::new(ASTExpression::VariableAccess(
                                 ((block_tokens[2][3].clone(), false), []).into()
                             )),
-                            Rc::new(ASTExpression::LiteralValue(block_tokens[2][5].clone()))
+                            Box::new(ASTExpression::LiteralValue(block_tokens[2][5].clone()))
                         )
                     }
                     .into()
@@ -411,10 +411,10 @@ mod tests {
                     VariableAssignment {
                         identifier: ((block_tokens[2][0].clone(), false), []).into(),
                         value: ASTExpression::SumOf(
-                            Rc::new(ASTExpression::VariableAccess(
+                            Box::new(ASTExpression::VariableAccess(
                                 ((block_tokens[2][3].clone(), false), []).into()
                             )),
-                            Rc::new(ASTExpression::LiteralValue(block_tokens[2][5].clone()))
+                            Box::new(ASTExpression::LiteralValue(block_tokens[2][5].clone()))
                         )
                     }
                     .into()
@@ -466,10 +466,10 @@ mod tests {
             Ok(ImInYr {
                 label: block_tokens[0][0].clone(),
                 condition: Some(LoopCondition::TIL(ASTExpression::BothSaem(
-                    Rc::new(ASTExpression::VariableAccess(
+                    Box::new(ASTExpression::VariableAccess(
                         ((block_tokens[0][6].clone(), false), []).into()
                     )),
-                    Rc::new(ASTExpression::LiteralValue(block_tokens[0][8].clone())),
+                    Box::new(ASTExpression::LiteralValue(block_tokens[0][8].clone())),
                 ))),
                 on_iteration: Some(LoopIterationOperation {
                     operation: LoopOperation::UPPIN(block_tokens[0][1].clone()),
@@ -489,10 +489,10 @@ mod tests {
                     VariableAssignment {
                         identifier: ((block_tokens[2][0].clone(), false), []).into(),
                         value: ASTExpression::SumOf(
-                            Rc::new(ASTExpression::VariableAccess(
+                            Box::new(ASTExpression::VariableAccess(
                                 ((block_tokens[2][3].clone(), false), []).into()
                             )),
-                            Rc::new(ASTExpression::LiteralValue(block_tokens[2][5].clone()))
+                            Box::new(ASTExpression::LiteralValue(block_tokens[2][5].clone()))
                         )
                     }
                     .into()

@@ -100,7 +100,7 @@ pub fn parse_block_switch(statement_iterator: &mut StatementIterator) -> ASTBloc
 #[cfg(test)]
 mod tests {
     use crate::parser::expression::VariableAccess;
-    use std::{collections::VecDeque, rc::Rc};
+    use std::collections::VecDeque;
 
     use crate::{
         lexer::{Keywords, TokenType, TokenValue},
@@ -195,11 +195,11 @@ mod tests {
                         accesses: [].into()
                     },
                     value: ASTExpression::SumOf(
-                        Rc::new(ASTExpression::VariableAccess(VariableAccess {
+                        Box::new(ASTExpression::VariableAccess(VariableAccess {
                             name: (block_tokens[1][3].clone(), false).into(),
                             accesses: [].into()
                         },)),
-                        Rc::new(ASTExpression::LiteralValue(block_tokens[1][5].clone()))
+                        Box::new(ASTExpression::LiteralValue(block_tokens[1][5].clone()))
                     )
                 }
                 .into(),

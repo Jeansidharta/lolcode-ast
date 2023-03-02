@@ -13,8 +13,8 @@ fn binary_normal_usecase() {
     assert_eq!(
         parse_binary_operand(&operation, &mut operands.clone().into()),
         Ok((
-            Rc::new(ASTExpression::LiteralValue(operands[0].clone())),
-            Rc::new(ASTExpression::VariableAccess(VariableAccess {
+            Box::new(ASTExpression::LiteralValue(operands[0].clone())),
+            Box::new(ASTExpression::VariableAccess(VariableAccess {
                 name: (operands[2].clone(), false).into(),
                 accesses: [].into()
             })),
@@ -33,8 +33,8 @@ fn binary_no_an() {
     assert_eq!(
         parse_binary_operand(&operation, &mut operands.clone().into()),
         Ok((
-            Rc::new(ASTExpression::LiteralValue(operands[0].clone())),
-            Rc::new(ASTExpression::VariableAccess(VariableAccess {
+            Box::new(ASTExpression::LiteralValue(operands[0].clone())),
+            Box::new(ASTExpression::VariableAccess(VariableAccess {
                 name: (operands[1].clone(), false).into(),
                 accesses: [].into()
             })),
@@ -55,8 +55,8 @@ fn binary_trailling_an() {
     assert_eq!(
         parse_binary_operand(&operation, &mut operands.clone().into()),
         Ok((
-            Rc::new(ASTExpression::LiteralValue(operands[0].clone())),
-            Rc::new(ASTExpression::VariableAccess(VariableAccess {
+            Box::new(ASTExpression::LiteralValue(operands[0].clone())),
+            Box::new(ASTExpression::VariableAccess(VariableAccess {
                 name: (operands[2].clone(), false).into(),
                 accesses: [].into()
             })),
@@ -78,8 +78,8 @@ fn binary_prefix_an() {
     assert_eq!(
         parse_binary_operand(&operation, &mut operands.clone().into()),
         Ok((
-            Rc::new(ASTExpression::LiteralValue(operands[1].clone())),
-            Rc::new(ASTExpression::VariableAccess(
+            Box::new(ASTExpression::LiteralValue(operands[1].clone())),
+            Box::new(ASTExpression::VariableAccess(
                 ((operands[3].clone(), false), []).into()
             )),
         ))

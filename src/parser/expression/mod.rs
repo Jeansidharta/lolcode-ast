@@ -1,7 +1,7 @@
 use crate::lexer::{Keywords, Token, TokenType};
 use crate::parser::statements::error_type::ASTErrorType;
 use crate::parser::StatementIterator;
-use std::{collections::VecDeque, rc::Rc};
+use std::collections::VecDeque;
 
 #[cfg(test)]
 mod tests;
@@ -18,23 +18,23 @@ pub use variable_access::VariableAccess;
 pub enum ASTExpression {
     LiteralValue(Token),
     VariableAccess(VariableAccess),
-    BothOf(Rc<ASTExpression>, Rc<ASTExpression>),
-    EitherOf(Rc<ASTExpression>, Rc<ASTExpression>),
-    WonOf(Rc<ASTExpression>, Rc<ASTExpression>),
-    Not(Rc<ASTExpression>),
+    BothOf(Box<ASTExpression>, Box<ASTExpression>),
+    EitherOf(Box<ASTExpression>, Box<ASTExpression>),
+    WonOf(Box<ASTExpression>, Box<ASTExpression>),
+    Not(Box<ASTExpression>),
     AllOf(VecDeque<ASTExpression>),
     AnyOf(VecDeque<ASTExpression>),
-    SumOf(Rc<ASTExpression>, Rc<ASTExpression>),
-    DiffOf(Rc<ASTExpression>, Rc<ASTExpression>),
-    ProduktOf(Rc<ASTExpression>, Rc<ASTExpression>),
-    QuoshuntOf(Rc<ASTExpression>, Rc<ASTExpression>),
-    ModOf(Rc<ASTExpression>, Rc<ASTExpression>),
-    BiggrOf(Rc<ASTExpression>, Rc<ASTExpression>),
-    SmallrOf(Rc<ASTExpression>, Rc<ASTExpression>),
-    BothSaem(Rc<ASTExpression>, Rc<ASTExpression>),
-    Diffrint(Rc<ASTExpression>, Rc<ASTExpression>),
+    SumOf(Box<ASTExpression>, Box<ASTExpression>),
+    DiffOf(Box<ASTExpression>, Box<ASTExpression>),
+    ProduktOf(Box<ASTExpression>, Box<ASTExpression>),
+    QuoshuntOf(Box<ASTExpression>, Box<ASTExpression>),
+    ModOf(Box<ASTExpression>, Box<ASTExpression>),
+    BiggrOf(Box<ASTExpression>, Box<ASTExpression>),
+    SmallrOf(Box<ASTExpression>, Box<ASTExpression>),
+    BothSaem(Box<ASTExpression>, Box<ASTExpression>),
+    Diffrint(Box<ASTExpression>, Box<ASTExpression>),
     Smoosh(VecDeque<ASTExpression>),
-    Maek(Rc<ASTExpression>, Token),
+    Maek(Box<ASTExpression>, Token),
 }
 
 /// Errors that can only occur inside an expression
@@ -130,13 +130,13 @@ fn parse_optional_an(tokens: &mut StatementIterator) -> Option<Token> {
 fn parse_binary_operand(
     operator_token: &Token,
     tokens: &mut StatementIterator,
-) -> Result<(Rc<ASTExpression>, Rc<ASTExpression>), ASTErrorType> {
+) -> Result<(Box<ASTExpression>, Box<ASTExpression>), ASTErrorType> {
     parse_optional_an(tokens);
     let first_operand = parse_operand(operator_token, tokens)?;
     parse_optional_an(tokens);
     let second_operand = parse_operand(operator_token, tokens)?;
     parse_optional_an(tokens);
-    Ok((Rc::new(first_operand), Rc::new(second_operand)))
+    Ok((Box::new(first_operand), Box::new(second_operand)))
 }
 
 fn parse_infinite_operands(
@@ -193,7 +193,7 @@ fn parse_not(
     tokens: &mut StatementIterator,
 ) -> Result<ASTExpression, ASTErrorType> {
     let operand = parse_operand(&first_token, tokens)?;
-    Ok(ASTExpression::Not(Rc::new(operand)))
+    Ok(ASTExpression::Not(Box::new(operand)))
 }
 
 fn parse_all_of(
@@ -325,5 +325,5 @@ fn parse_maek(
         ) => token,
         Some(token) => return Err(ASTErrorType::UnexpectedToken(token)),
     };
-    Ok(ASTExpression::Maek(Rc::new(expression), new_type))
+    Ok(ASTExpression::Maek(Box::new(expression), new_type))
 }
