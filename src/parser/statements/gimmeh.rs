@@ -4,7 +4,7 @@ use crate::parser::statements::ASTErrorType;
 use crate::parser::statements::ASTNode;
 use crate::parser::StatementIterator;
 
-pub fn parse_gimmeh(
+pub(crate) fn parse_gimmeh(
     first_token: Token,
     tokens: &mut StatementIterator,
 ) -> Result<ASTNode, ASTErrorType> {

@@ -9,9 +9,12 @@ use crate::parser::expression::{parse_expression, ASTExpression};
 
 use super::o_rly::ORlyError;
 
+/// A `WTF?` statement, which is equivalent to a `switch` in other languages
 #[derive(Debug, Clone, PartialEq)]
 pub struct Wtf {
+    /// The cases to test the given expression againsT
     pub omg: VecDeque<(ASTExpression, ASTBlock)>,
+    /// If no `OMG` matches, use the `OMGWTF`
     pub omg_wtf: Option<ASTBlock>,
 }
 

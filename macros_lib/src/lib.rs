@@ -1,63 +1,5 @@
 use proc_macro::{self, TokenStream, TokenTree};
 
-#[proc_macro]
-pub fn symbol_enum(token_stream: TokenStream) -> TokenStream {
-    let mut tokens = Vec::<Vec<String>>::new();
-    tokens.push(Vec::new());
-
-    token_stream.into_iter().for_each(|token| {
-        match token {
-            TokenTree::Ident(ident) => {
-                let token = tokens.last_mut().unwrap();
-                token.push(ident.to_string());
-            }
-            TokenTree::Punct(punct) => {
-                if punct.as_char() == ',' {
-                    tokens.push(Vec::new())
-                }
-            }
-            _ => {}
-        };
-    });
-
-    let tokens_with_space: Vec<String> = tokens.iter().map(|token| token.join(" ")).collect();
-    let tokens_with_underline: Vec<String> = tokens.iter().map(|token| token.join("_")).collect();
-
-    return format!(
-        r#"
-#[derive(Debug, Clone)]
-pub enum Symbol {{
-    {}
-}}
-
-impl Symbol {{
-    pub fn to_string_slice(&self) -> &str {{
-        match self {{
-            {}
-        }}
-    }}
-}}
-
-pub const ALL_SYMBOLS: [Symbol;{}] = [
-    {}
-];
-    "#,
-        tokens_with_underline.join(",\n"),
-        tokens_with_underline
-            .iter()
-            .zip(tokens_with_space.iter())
-            .map(|(underline, space)| format!("Symbol::{} => \"{}\",", underline, space))
-            .collect::<String>(),
-        tokens.len(),
-        tokens_with_underline
-            .iter()
-            .map(|token| format!("Symbol::{},", token))
-            .collect::<String>()
-    )
-    .parse()
-    .unwrap();
-}
-
 #[proc_macro_derive(ToStringSlice)]
 pub fn derive_to_string_slice(tokens: TokenStream) -> TokenStream {
     let mut tokens_iter =
@@ -84,8 +26,8 @@ pub fn derive_to_string_slice(tokens: TokenStream) -> TokenStream {
 
     format!(
         r#"
-impl {} {{
-    pub fn to_string_slice(&self) -> &str {{
+impl Into<&'static str> for &{} {{
+    fn into(self) -> &'static str {{
         match self {{
             {}
         }}
@@ -138,7 +80,7 @@ const ALL_SYMBOLS: [{}; {}] = [
 ];
 
 impl {} {{
-    pub fn iter() -> std::slice::Iter<'static, {}> {{
+    pub(crate) fn iter() -> std::slice::Iter<'static, {}> {{
         ALL_SYMBOLS.iter()
     }}
 }}

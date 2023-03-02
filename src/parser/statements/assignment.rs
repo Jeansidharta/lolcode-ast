@@ -5,15 +5,27 @@ use crate::parser::statements::ASTNode;
 use crate::parser::statements::VariableAccess;
 use crate::parser::StatementIterator;
 
+/// A Variable Assignment statement
 #[derive(Debug, Clone, PartialEq)]
 pub struct VariableAssignment {
+    /// The variable that will receive the value
     pub identifier: VariableAccess,
+    /// The value that will be put in the variable
     pub value: ASTExpression,
 }
 
+/// Errors tha can only happen in a variable assignment statement
 #[derive(Debug, PartialEq, Clone)]
 pub enum VariableAssignmentError {
+    /// When a variable statement is missing the "R" token.
+    ///
+    /// Ex of error: `var 10`
+    /// correct usage: `var R 10`
     MissingR(Token),
+    /// When a variable statement has no value expression
+    ///
+    /// Ex of error: `var R`
+    /// correct usage: `var R 10`
     ExpectedValue(Token),
 }
 

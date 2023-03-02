@@ -7,16 +7,24 @@ use crate::parser::statements::ASTErrorType;
 use crate::parser::statements::ASTNode;
 use crate::parser::StatementIterator;
 
+/// When defining a variable, it can either be initialized by value, or by type.
 #[derive(Debug, PartialEq, Clone)]
 pub enum IHasAInitialValue {
+    /// The variable is initialized by a value, which is the result of the given expression
     Expression(ASTExpression),
+    /// The variable is initialized by type.
     Type(ASTType),
 }
 
+/// Errors that can only happen when parsing an `I HAS A` statement
 #[derive(Debug, PartialEq, Clone)]
 pub enum IHasAError {
+    /// The given variable name was not an identifier. This can happen if you pass something like a
+    /// literal value
     InvalidIdentifier(Token),
+    /// A `I HAS A` token was found, but no variable name after
     MissingIdentifier(Token),
+    /// An `ITZ` token was found, but no expression or type after
     ExpectedInitialValue(Token),
 }
 
@@ -38,9 +46,12 @@ impl From<ASTType> for IHasAInitialValue {
     }
 }
 
+/// The variable definition statement
 #[derive(Debug, Clone, PartialEq)]
 pub struct IHasA {
+    /// The variable that'll be defined
     pub identifier: Identifier,
+    /// The variable's initial value or type
     pub initial_value: Option<IHasAInitialValue>,
 }
 

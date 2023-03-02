@@ -8,8 +8,10 @@ use self::{
 pub use blocks::ASTBlock;
 
 mod blocks;
+/// Expression related data structures and logic.
 pub mod expression;
 mod statement_iterator;
+/// Statement related data structures and logic
 pub mod statements;
 
 impl From<(Token, bool)> for Identifier {
@@ -18,6 +20,7 @@ impl From<(Token, bool)> for Identifier {
     }
 }
 
+/// Transforms an array of tokens into an ASTBlock, which is an array of statements.
 pub fn parse(tokens: Vec<Token>) -> ASTBlock {
     let mut line_iterator = StatementIterator::new(tokens);
     return parse_block_root(&mut line_iterator);

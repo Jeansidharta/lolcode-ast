@@ -6,6 +6,8 @@ use std::collections::VecDeque;
 use crate::lexer::{Token, TokenType};
 use crate::parser::expression::{parse_expression, ASTExpression};
 
+/// The `VISIBLE` statement. It can accept multiple statements, and an optional "!" at the end to
+/// prevent a newline from being printed
 #[derive(Debug, Clone, PartialEq)]
 pub struct Visible(pub VecDeque<ASTExpression>, pub Option<Token>);
 

@@ -6,9 +6,19 @@ use std::collections::VecDeque;
 
 use crate::lexer::{Token, TokenType};
 
+/// A "VariableAccess" represents both a simple variable name, and a bukkit access.
+///
+/// A simple variable name would be just an [Identifier][1] token in the code.
+/// A bukkit access would be an [Identifier][1] token followed by a BukkitSlotAccess and another
+/// [Identifier][1].
+///
+/// [1]: crate::parser::expression::Identifier
 #[derive(Debug, PartialEq, Clone)]
 pub struct VariableAccess {
+    /// The first identifier used.
     pub name: Identifier,
+    /// The other identifiers used after the
+    /// BukkitSlotAccess
     pub accesses: VecDeque<Identifier>,
 }
 

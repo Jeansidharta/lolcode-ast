@@ -8,15 +8,21 @@ use std::collections::VecDeque;
 use crate::lexer::{Keywords, Token, TokenType};
 use crate::parser::blocks::{parse_block_function, ASTBlock};
 
+/// A `HOW IZ I` statement, which is used to define a function.
 #[derive(Clone, Debug, PartialEq)]
 pub struct HowIzI {
+    /// The function name
     pub name: Identifier,
+    /// A list of the function's arguments
     pub arguments: VecDeque<Identifier>,
+    /// The function's body
     pub body: ASTBlock,
 }
 
+/// Errors that can only happen when parsing a `HOW IZ I` statement
 #[derive(Debug, PartialEq, Clone)]
 pub enum HowIsIError {
+    /// A `HOW IZ I` token was found, but no Identifier after
     MissingNameIdentifier(Token),
 }
 

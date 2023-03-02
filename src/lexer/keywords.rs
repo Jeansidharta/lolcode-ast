@@ -4,7 +4,14 @@ use std::fmt::Debug;
 
 use macros_lib::{IterableEnum, ToStringSlice};
 
+/// The enum with all LOLCODE keywords
+///
+/// "Keyword" in this case is not necessarily a single word, but one or more words that represent
+/// an operation in LOLCODE, such as "I HAS A" or "ITZ".
+/// All spaces beteween words are replaced by underscores
 #[derive(ToStringSlice, IterableEnum, Clone, PartialEq, Debug)]
+// No point in documenting all keywords here. Will just allow missing_docs
+#[allow(missing_docs)]
 pub enum Keywords {
     BTW,
     HAS_A,
@@ -67,4 +74,17 @@ pub enum Keywords {
     I_IZ,
     R,
     A,
+}
+
+impl Keywords {
+    /// Returns a &str for the keyword.
+    ///
+    /// ```rust
+    /// # use lolcode_ast::lexer::Keywords;
+    /// let keyword = Keywords::I_HAS_A;
+    /// assert_eq!(keyword.into_str(), "I HAS A")
+    /// ```
+    pub fn into_str(&self) -> &'static str {
+        return self.into();
+    }
 }

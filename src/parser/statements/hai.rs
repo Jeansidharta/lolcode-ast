@@ -5,6 +5,7 @@ use std::collections::VecDeque;
 use crate::lexer::Token;
 use crate::parser::StatementIterator;
 
+/// A HAI "statement"
 #[derive(Debug, Clone, PartialEq)]
 pub struct Hai(pub VecDeque<Token>);
 

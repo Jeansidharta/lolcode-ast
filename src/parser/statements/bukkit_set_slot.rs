@@ -9,10 +9,14 @@ use crate::parser::StatementIterator;
 
 use super::assignment::VariableAssignmentError;
 
+/// A statement to set a bukkit slot to a value
 #[derive(Clone, Debug, PartialEq)]
 pub struct BukkitSetSlot {
+    /// The bukkit whose slot will be set
     pub bukkit: VariableAccess,
+    /// The bukkit's slot
     pub slot_name: Identifier,
+    /// The value that'll be put
     pub value: ASTExpression,
 }
 

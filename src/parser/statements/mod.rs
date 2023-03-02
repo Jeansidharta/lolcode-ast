@@ -18,22 +18,76 @@ use crate::lexer::{Keywords, Token, TokenType};
 use crate::parser::expression::VariableAccess;
 use crate::parser::StatementIterator;
 
+/// Varaible assignemnt statement. Ex: `var R "some_value"`
 pub mod assignment;
+/// Assign a value to a bukkit's slot. Ex: `var HAS A slot_name ITZ "some_value"`
 pub mod bukkit_set_slot;
 pub(crate) mod error_type;
+/// Returs a value from within a function. Ex: `FOUND YR "some_value"`
 pub mod found_yr;
+/// Reads user input into a variable. Ex: `GIMMEH var`
 pub mod gimmeh;
+/// Returns `NOOB` from within a function. Ex: `GTFO`
 pub mod gtfo;
+/// Initializes a program, specifying it's LOLCODE version. Ex: `HAI 1.3`
 pub mod hai;
+/// Defines a function.
+///
+/// Ex:
+/// ```LOLCODE
+/// HOW IZ I function_name YR argument1 AN YR argument2
+///     BTW some code here
+/// IF U SAY SO
+/// ```
 pub mod how_is_i;
+/// Variable Initialization. Ex: `I HAS A var ITZ "some_value"`
 pub mod i_has_a;
+/// Calls a function. Ex: `I IZ some_function YR "value 1" AN YR "value 2"`
 pub mod i_is;
+/// Loop
+///
+/// Ex:
+/// ```LOLCODE
+/// IM IN YR loop UPPIN YR var TIL BOTH SAEM var AN 10
+///     VISIBLE var
+/// IM OUTTA YR loop
+/// ```
 pub mod im_in_yr;
+/// Ends the program. This should be the last statement of the program.
 pub mod kthxbye;
+/// This is somewhat of an If statement.
+///
+/// Ex:
+/// ```LOLCODE
+/// BOTH SAEM var AN 0, O RLY?
+///     YA RLY
+///         VISIBLE "var is 0"
+///     MEBBE BOTH SAEM var AN 1
+///         VISIBLE "var is 1"
+///     NO WAI
+///         VISIBLE "var is neither 0 or 1"
+/// OIC
+/// ```
 pub mod o_rly;
+/// Prints the given statements to stdout
 pub mod visible;
+/// A switch statement
+///
+/// Ex:
+/// ```LOLCODE
+/// var, WTF?
+///     OMG 0
+///         VISIBLE "var is 0"
+///     OMG 1
+///         VISIBLE "var is 1"
+///     OMGWTF
+///         VISIBLE "var is neither 0 or 1"
+/// OIC
+/// ```
 pub mod wtf;
 
+/// An AST node that represents a LOLCODE statement.
+#[allow(missing_docs)]
 #[derive(Debug, PartialEq, Clone)]
 pub enum ASTNode {
     IHasA(IHasA),
@@ -69,7 +123,7 @@ impl From<ASTErrorType> for ASTNode {
     }
 }
 
-pub fn parse_statement(
+pub(crate) fn parse_statement(
     first_token: Token,
     tokens: &mut StatementIterator,
 ) -> Result<ASTNode, ASTErrorType> {

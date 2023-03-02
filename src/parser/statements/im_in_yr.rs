@@ -9,17 +9,58 @@ use crate::parser::statements::ASTNode;
 use crate::parser::ASTBlock;
 use crate::parser::StatementIterator;
 
+/// Errors tha can only happen when parsing "IM IN YR" expressions
 #[derive(Debug, PartialEq, Clone)]
 pub enum ImInYrError {
+    /// If an operation is provided after the label, the next token must be `YR`. If this is not
+    /// the case, this error will be thrown
+    ///
+    /// Ex of error: `IM IN YR loop UPPIN var`
+    /// How it should be: `IM IN YR loop UPPIN YR var`
     MissingYr(Token),
+    /// No label for the loop was provided.
+    ///
+    /// Ex of error: `IM IN YR`
+    /// How it should be: `IM IN YR loop`
     MissingStartLabel(Token),
+    /// The provided label is not a valid identifier or bukkit access. This will happen if you
+    /// provide something like a number or a yarn (string) instead of a variable. Ex: `IM IN YR 10`
+    ///
+    /// Ex of error: `IM IN YR 10`
+    /// How it should be: `IM IN var`
     InvalidStartLabel(Token),
+    /// No label provided after `IM OUTTA YR`, which closes the loop.
+    ///
+    /// Ex of error: `IM OUTTA YR`
+    /// How it should be: `IM OUTTA YR loop`
     MissingEndLabel(Token),
+    /// The provided label afte `IM OUTTA YR` is not a valid identifier or bukkit access. This will happen if you
+    /// provide something like a number or a yarn (string) instead of a variable. Ex: `IM OUTTA YR 10`
+    ///
+    /// Ex of error: `IM OUTTA YR 10`
+    /// How it should be: `IM OUTTA YR loop`
     InvalidEndLabel(Token),
+    /// No `IM OUTTA YR' was found for closing the loop.
     MissingImOuttaYr(Token),
+    /// The provided operation after the label was invalid.
+    ///
+    /// Ex of error: `IM IN YR loop ADDING YR var`
+    /// How it should be: `IM IN YR loop UPPIN YR var`
     InvalidOperation(Token),
+    /// No operand was provided after the operation
+    ///
+    /// Ex of error: `IM IN YR loop UPPIN YR`
+    /// How it should be: `IM IN YR loop UPPIN YR var`
     MissingOperand(Token),
+    /// An invalid token was provided after the operand.
+    ///
+    /// Ex of error: `IM IN YR loop UPPIN YR var BEFORE`
+    /// How it should be: `IM IN YR loop UPPIN YR var TIL`
     InvalidConditional(Token),
+    /// A valid conditional token was provided, but not expression after
+    ///
+    /// Ex of error: `IM IN YR loop UPPIN YR var TIL`
+    /// How it should be: `IM IN YR loop UPPIN YR var TIL BOTH SAEM var AN 10`
     MissingConditionalExpression(Token),
 }
 
@@ -30,8 +71,11 @@ impl Into<ASTErrorType> for ImInYrError {
 }
 
 #[derive(Debug, PartialEq, Clone)]
+/// The operation used in the loop.
 pub enum LoopOperation {
+    /// Will add one to the operand on every iteration
     UPPIN(Token),
+    /// Will subract one to the operand on every iteration
     NERFIN(Token),
 }
 
@@ -44,89 +88,141 @@ impl Into<Token> for LoopOperation {
     }
 }
 
+/// The condition used in the loop.
 #[derive(Debug, PartialEq, Clone)]
 pub enum LoopCondition {
+    /// Will loop until the given expression is WIN (true)
     TIL(ASTExpression),
+    /// Will loop while the given expression is WIN (true)
     WILE(ASTExpression),
 }
 
 #[derive(Debug, PartialEq, Clone)]
+/// The operation provided for the loop after the label.
 pub struct LoopIterationOperation {
+    /// The operation token
     pub operation: LoopOperation,
+    /// The operand
     pub operand: VariableAccess,
-    pub condition: Option<LoopCondition>,
 }
 
+/// A statement that will start a loop. This can have 4 forms:
+///
+/// - Without conditional or operation:
+/// ```LOLCODE
+/// IM IN YR loop
+///     BTW some code here
+/// IM OUTTA YR loop
+/// ```
+///
+/// - With conditional but no operation:
+/// ```LOLCODE
+/// IM IN YR loop TIL <conditional>
+///     BTW some code here
+/// IM OUTTA YR loop
+///
+/// - Without conditional but with operation:
+/// ```LOLCODE
+/// IM IN YR loop UPPIN YR var
+///     BTW some code here
+/// IM OUTTA YR loop
+///
+/// - With both conditional and operation:
+/// ```LOLCODE
+/// IM IN YR loop UPPIN YR var TIL <conditional>
+///     BTW some code here
+/// IM OUTTA YR loop
 #[derive(Debug, Clone, PartialEq)]
 pub struct ImInYr {
+    /// The label provided. Can be any identifier token
     pub label: Token,
+    /// The operation that will run on every iteration
     pub on_iteration: Option<LoopIterationOperation>,
+    /// The condition expression that will determine if a there will be a next loop iteration
+    pub condition: Option<LoopCondition>,
+    /// The statements inside the loop.
     pub code_block: ASTBlock,
+    /// The label after the loop closing block
     pub end_label: Token,
 }
 
-impl TryFrom<(Token, &mut &mut StatementIterator)> for LoopIterationOperation {
-    type Error = ASTErrorType;
+fn parse_conditional(
+    tokens: &mut &mut StatementIterator,
+) -> Result<Option<LoopCondition>, ASTErrorType> {
+    macro_rules! parse_conditional {
+        ($first_token: ident) => {{
+            let first_conditional_token = match tokens.next() {
+                None => return Err(ImInYrError::MissingConditionalExpression($first_token).into()),
+                Some(token) => token,
+            };
 
-    fn try_from(
-        (first_token, tokens): (Token, &mut &mut StatementIterator),
-    ) -> Result<Self, Self::Error> {
-        let operation = match first_token.token_type {
-            TokenType::Keyword(Keywords::UPPIN) => LoopOperation::UPPIN(first_token),
-            TokenType::Keyword(Keywords::NERFIN) => LoopOperation::NERFIN(first_token),
-            _ => unreachable!(),
-        };
-
-        match tokens.next() {
-            None => return Err(ImInYrError::MissingOperand(operation.into()).into()),
-            Some(Token {
-                token_type: TokenType::Keyword(Keywords::YR),
-                ..
-            }) => {}
-            Some(token) => return Err(ImInYrError::MissingYr(token).into()),
-        }
-
-        let operand = match tokens.next() {
-            None => return Err(ImInYrError::MissingOperand(operation.into()).into()),
-            Some(token) => parse_variable_access(token, tokens)?,
-        };
-
-        macro_rules! parse_conditional {
-            ($first_token: ident) => {{
-                let first_conditional_token = match tokens.next() {
-                    None => {
-                        return Err(ImInYrError::MissingConditionalExpression($first_token).into())
-                    }
-                    Some(token) => token,
-                };
-
-                parse_expression(first_conditional_token, tokens)
-            }};
-        }
-
-        let condition = match tokens.next() {
-            None => None,
-            Some(
-                token @ Token {
-                    token_type: TokenType::Keyword(Keywords::TIL),
-                    ..
-                },
-            ) => Some(LoopCondition::TIL(parse_conditional!(token)?)),
-            Some(
-                token @ Token {
-                    token_type: TokenType::Keyword(Keywords::WILE),
-                    ..
-                },
-            ) => Some(LoopCondition::WILE(parse_conditional!(token)?)),
-            Some(token) => return Err(ImInYrError::InvalidConditional(token).into()),
-        };
-
-        Ok(LoopIterationOperation {
-            operation,
-            operand,
-            condition,
-        })
+            parse_expression(first_conditional_token, tokens)
+        }};
     }
+
+    let condition = match tokens.next_if(|t| {
+        matches!(
+            t.token_type,
+            TokenType::Keyword(Keywords::TIL | Keywords::WILE)
+        )
+    }) {
+        Some(
+            token @ Token {
+                token_type: TokenType::Keyword(Keywords::TIL),
+                ..
+            },
+        ) => Some(LoopCondition::TIL(parse_conditional!(token)?)),
+        Some(
+            token @ Token {
+                token_type: TokenType::Keyword(Keywords::WILE),
+                ..
+            },
+        ) => Some(LoopCondition::WILE(parse_conditional!(token)?)),
+        _ => None,
+    };
+
+    Ok(condition)
+}
+
+fn parse_iteration_operation(
+    tokens: &mut &mut StatementIterator,
+) -> Result<Option<LoopIterationOperation>, ASTErrorType> {
+    let operation = match tokens.next_if(|t| {
+        matches!(
+            t.token_type,
+            TokenType::Keyword(Keywords::UPPIN | Keywords::NERFIN)
+        )
+    }) {
+        Some(
+            token @ Token {
+                token_type: TokenType::Keyword(Keywords::UPPIN),
+                ..
+            },
+        ) => LoopOperation::UPPIN(token),
+        Some(
+            token @ Token {
+                token_type: TokenType::Keyword(Keywords::NERFIN),
+                ..
+            },
+        ) => LoopOperation::NERFIN(token),
+        _ => return Ok(None),
+    };
+
+    match tokens.next() {
+        None => return Err(ImInYrError::MissingOperand(operation.into()).into()),
+        Some(Token {
+            token_type: TokenType::Keyword(Keywords::YR),
+            ..
+        }) => {}
+        Some(token) => return Err(ImInYrError::MissingYr(token).into()),
+    }
+
+    let operand = match tokens.next() {
+        None => return Err(ImInYrError::MissingOperand(operation.into()).into()),
+        Some(token) => parse_variable_access(token, tokens)?,
+    };
+
+    Ok(Some(LoopIterationOperation { operation, operand }))
 }
 
 impl TryFrom<(Token, &mut StatementIterator)> for ImInYr {
@@ -146,16 +242,8 @@ impl TryFrom<(Token, &mut StatementIterator)> for ImInYr {
             Some(token) => return Err(ImInYrError::InvalidStartLabel(token).into()),
         };
 
-        let on_iteration = match tokens.next() {
-            None => None,
-            Some(
-                token @ Token {
-                    token_type: TokenType::Keyword(Keywords::UPPIN | Keywords::NERFIN),
-                    ..
-                },
-            ) => Some(LoopIterationOperation::try_from((token, &mut tokens))?),
-            Some(token) => return Err(ImInYrError::InvalidOperation(token).into()),
-        };
+        let on_iteration = parse_iteration_operation(&mut tokens)?;
+        let condition = parse_conditional(&mut tokens)?;
 
         tokens.next_statement_should_be_empty()?;
 
@@ -182,6 +270,7 @@ impl TryFrom<(Token, &mut StatementIterator)> for ImInYr {
             on_iteration,
             code_block,
             end_label,
+            condition,
         })
     }
 }
@@ -237,6 +326,7 @@ mod tests {
             Ok(ImInYr {
                 label: block_tokens[0][0].clone(),
                 on_iteration: None,
+                condition: None,
                 code_block: [
                     Visible(
                         [
@@ -301,10 +391,10 @@ mod tests {
             ImInYr::try_from((first_token, &mut block_tokens.clone().into())),
             Ok(ImInYr {
                 label: block_tokens[0][0].clone(),
+                condition: None,
                 on_iteration: Some(LoopIterationOperation {
                     operation: LoopOperation::UPPIN(block_tokens[0][1].clone()),
                     operand: ((block_tokens[0][3].clone(), false), []).into(),
-                    condition: None
                 }),
                 code_block: [
                     Visible(
@@ -375,15 +465,15 @@ mod tests {
             ImInYr::try_from((first_token, &mut block_tokens.clone().into())),
             Ok(ImInYr {
                 label: block_tokens[0][0].clone(),
+                condition: Some(LoopCondition::TIL(ASTExpression::BothSaem(
+                    Rc::new(ASTExpression::VariableAccess(
+                        ((block_tokens[0][6].clone(), false), []).into()
+                    )),
+                    Rc::new(ASTExpression::LiteralValue(block_tokens[0][8].clone())),
+                ))),
                 on_iteration: Some(LoopIterationOperation {
                     operation: LoopOperation::UPPIN(block_tokens[0][1].clone()),
                     operand: ((block_tokens[0][3].clone(), false), []).into(),
-                    condition: Some(LoopCondition::TIL(ASTExpression::BothSaem(
-                        Rc::new(ASTExpression::VariableAccess(
-                            ((block_tokens[0][6].clone(), false), []).into()
-                        )),
-                        Rc::new(ASTExpression::LiteralValue(block_tokens[0][8].clone())),
-                    )))
                 }),
                 code_block: [
                     Visible(

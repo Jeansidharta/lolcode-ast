@@ -13,7 +13,7 @@ impl TokenType {
             TokenType::QuestionMark => "?".into(),
             TokenType::Ellipsis => "...".into(),
             TokenType::Identifier(ident) => ident.clone(),
-            TokenType::Keyword(keyword) => keyword.to_string_slice().to_string(),
+            TokenType::Keyword(keyword) => keyword.into_str().to_string(),
             TokenType::Symbol(symbol) => symbol.to_string(),
             TokenType::CommentSingleLine(comment) => format!("BTW{}", comment),
             TokenType::CommentMultiLine(comment) => format!("OBTW{}TLDT", comment),

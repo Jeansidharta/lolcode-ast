@@ -1,6 +1,7 @@
 use crate::lexer::Position;
 use std::fmt::Debug;
 
+/// A Range is a section of the text with a start position and an end position.
 #[derive(Clone)]
 pub struct Range(pub Position, pub Position);
 
@@ -29,7 +30,7 @@ impl PartialEq for Range {
 }
 
 impl Range {
-    pub fn start_line(&self) -> i32 {
+    pub(crate) fn start_line(&self) -> i32 {
         self.0.line
     }
 }

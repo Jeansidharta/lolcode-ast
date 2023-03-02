@@ -3,11 +3,18 @@ use std::{
     ops::{Add, AddAssign},
 };
 
+/// The Position struct represents the position of a character in the text.
+///
+/// Note that the bytes field and chars field may differ if the text has non-ascii characters
 #[derive(Clone, Copy)]
 pub struct Position {
+    /// The line of the character
     pub line: i32,
+    /// The column of the character
     pub column: i32,
+    /// The initial byte of the character
     pub bytes: i32,
+    /// The character index
     pub chars: i32,
 }
 

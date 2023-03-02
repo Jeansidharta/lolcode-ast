@@ -1,3 +1,5 @@
+use crate::parser::expression::parse_expression;
+use crate::parser::expression::ASTExpression;
 use crate::parser::statements::ASTErrorType;
 use crate::parser::statements::ASTNode;
 use crate::parser::StatementIterator;
@@ -6,16 +8,26 @@ use std::collections::VecDeque;
 use crate::lexer::{Keywords, Token, TokenType};
 use crate::parser::blocks::{parse_block_if, ASTBlock};
 
+/// The `O RLY` statement
 #[derive(Clone, PartialEq, Debug)]
 pub struct ORly {
+    /// The statements that must be executed if the given expression is true.
     pub if_true: Option<ASTBlock>,
+    /// The statements that must be executed if the given expression is false, and no mebbes were
+    /// truthful
     pub if_false: Option<ASTBlock>,
-    pub mebbes: VecDeque<ASTBlock>,
+    /// The statements that must be executed if the given expression false, but the mebbe
+    /// expression is true
+    pub mebbes: VecDeque<(ASTExpression, ASTBlock)>,
 }
 
+/// Errors that can only happen when parsing a `O RLY?` statement
 #[derive(Debug, PartialEq, Clone)]
 pub enum ORlyError {
+    /// A `O RLY` token was found, but no quesetion mark after it.
     MissingQuestionMark(Token),
+    /// A `MEBBE` token was found, but no expression after it
+    MissingMebbeExpression(Token),
 }
 
 impl Into<ASTErrorType> for ORlyError {
@@ -47,12 +59,16 @@ impl TryFrom<(Token, &mut StatementIterator)> for ORly {
         };
 
         let mut mebbes = VecDeque::new();
-        while tokens
-            .next_if(|token| matches!(token.token_type, TokenType::Keyword(Keywords::MEBBE)))
-            .is_some()
+        while let Some(mebbe_token) =
+            tokens.next_if_token_type_eq(TokenType::Keyword(Keywords::MEBBE))
         {
+            let first_expression_token = match tokens.next() {
+                None => return Err(ORlyError::MissingMebbeExpression(mebbe_token).into()),
+                Some(token) => token,
+            };
+            let mebbe_expression = parse_expression(first_expression_token, tokens)?;
             tokens.next_statement_should_be_empty()?;
-            mebbes.push_back(parse_block_if(tokens));
+            mebbes.push_back((mebbe_expression, parse_block_if(tokens)));
         }
 
         let if_false = if tokens
@@ -110,7 +126,10 @@ mod tests {
                 TokenType::Keyword(Keywords::VISIBLE),
                 TokenType::Identifier("Batata".to_string()),
             ],
-            vec![TokenType::Keyword(Keywords::MEBBE)],
+            vec![
+                TokenType::Keyword(Keywords::MEBBE),
+                TokenType::Value(TokenValue::String("SOME VALUE".to_string())),
+            ],
             vec![
                 TokenType::Keyword(Keywords::VISIBLE),
                 TokenType::Value(TokenValue::NOOB),
@@ -140,12 +159,15 @@ mod tests {
                     .into()]
                     .into()
                 ),
-                mebbes: [[Visible(
-                    [ASTExpression::LiteralValue(block_tokens[4][1].clone())].into(),
-                    None
-                )
-                .into()]
-                .into()]
+                mebbes: [(
+                    ASTExpression::LiteralValue(block_tokens[3][1].clone()),
+                    [Visible(
+                        [ASTExpression::LiteralValue(block_tokens[4][1].clone())].into(),
+                        None
+                    )
+                    .into()]
+                    .into()
+                )]
                 .into(),
                 if_false: Some(
                     [Visible(

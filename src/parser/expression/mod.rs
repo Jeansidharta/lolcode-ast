@@ -12,7 +12,9 @@ pub(crate) mod variable_access;
 pub use identifier::{ASTType, Identifier};
 pub use variable_access::VariableAccess;
 
+/// A LOLCODE expression.
 #[derive(Debug, PartialEq, Clone)]
+#[allow(missing_docs)]
 pub enum ASTExpression {
     LiteralValue(Token),
     VariableAccess(VariableAccess),
@@ -35,8 +37,10 @@ pub enum ASTExpression {
     Maek(Rc<ASTExpression>, Token),
 }
 
+/// Errors that can only occur inside an expression
 #[derive(Debug, PartialEq, Clone)]
 pub enum ExpressionError {
+    /// Not enough operands were given for the operation
     MissingOperands(Token),
 }
 

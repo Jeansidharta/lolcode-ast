@@ -4,7 +4,7 @@ use crate::parser::statements::ASTErrorType;
 use crate::parser::statements::ASTNode;
 use crate::parser::StatementIterator;
 
-pub fn parse_found_yr(
+pub(crate) fn parse_found_yr(
     first_token: Token,
     tokens: &mut StatementIterator,
 ) -> Result<ASTNode, ASTErrorType> {

@@ -8,11 +8,12 @@ use crate::lexer::{Keywords, Token, TokenType};
 
 use super::parse_statement;
 
+/// A block of code, which is an array of statements
 #[derive(Debug, PartialEq, Clone)]
 pub struct ASTBlock(pub VecDeque<ASTNode>);
 
-impl ASTBlock {
-    pub fn new() -> Self {
+impl Default for ASTBlock {
+    fn default() -> Self {
         Self(VecDeque::new())
     }
 }
@@ -40,7 +41,7 @@ fn parse_block(
     statement_iterator: &mut StatementIterator,
     should_stop_at_token: &dyn Fn(&Token) -> bool,
 ) -> ASTBlock {
-    let mut block = ASTBlock::new();
+    let mut block = ASTBlock::default();
     loop {
         match statement_iterator.next() {
             Some(token) => block.push_back(

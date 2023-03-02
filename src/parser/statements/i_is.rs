@@ -8,16 +8,34 @@ use std::collections::VecDeque;
 use crate::lexer::{Keywords, Token, TokenType};
 use crate::parser::expression::{parse_expression, ASTExpression};
 
+/// An `I IZ` statement, which is a function call
 #[derive(Debug, Clone, PartialEq)]
 pub struct IIz {
+    /// The name of the function. Note that this is of type VariableAccess, which means it can not
+    /// only be an identifier, but it can also be a bukkit access, and the function should be
+    /// placed inside the bukkit.
     pub name: VariableAccess,
+    /// A list of the arguments passed to the function.
     pub arguments: VecDeque<ASTExpression>,
 }
 
+/// Errors that can only happen in a `I IZ` statement
 #[derive(Debug, PartialEq, Clone)]
 pub enum IIzError {
+    /// No name provided.
+    ///
+    /// Ex of error: `I IZ MKAY`
+    /// correct usage: `I IZ function_name MKAY`
     MissingName(Token),
+    /// There was an YR token, but no argument was found after it.
+    ///
+    /// Ex of error: `I IZ function_name YR MKAY`
+    /// correct usage: `I IZ function_name YR argument MKAY`
     MissingArgument(Token),
+    /// No MKAY token was found at the end of the call
+    ///
+    /// Ex of error: `I IZ function_name YR argument`
+    /// correct usage: `I IZ function_name YR argument MKAY`
     MissingMkay(Token),
 }
 
