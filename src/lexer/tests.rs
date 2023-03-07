@@ -16,7 +16,7 @@ impl TokenType {
             TokenType::Keyword(keyword) => keyword.into_str().to_string(),
             TokenType::Symbol(symbol) => symbol.to_string(),
             TokenType::CommentSingleLine(comment) => format!("BTW{}", comment),
-            TokenType::CommentMultiLine(comment) => format!("OBTW{}TLDT", comment),
+            TokenType::CommentMultiLine(comment) => format!("OBTW{}TLDR", comment),
             TokenType::Value(value) => match value {
                 TokenValue::NOOB => "NOOB".to_string(),
                 TokenValue::Number(NumberToken::Int(num)) => num.to_string(),
