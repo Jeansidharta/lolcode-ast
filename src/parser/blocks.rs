@@ -1,6 +1,5 @@
 use crate::parser::statements::ASTNode;
 use std::collections::VecDeque;
-use std::ops::{Deref, DerefMut};
 
 use crate::parser::StatementIterator;
 
@@ -24,16 +23,12 @@ impl<const T: usize> From<[ASTNode; T]> for ASTBlock {
     }
 }
 
-impl Deref for ASTBlock {
-    type Target = VecDeque<ASTNode>;
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
+impl IntoIterator for ASTBlock {
+    type Item = ASTNode;
+    type IntoIter = std::collections::vec_deque::IntoIter<ASTNode>;
 
-impl DerefMut for ASTBlock {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
+    fn into_iter(self) -> Self::IntoIter {
+        self.0.into_iter()
     }
 }
 
@@ -44,7 +39,7 @@ fn parse_block(
     let mut block = ASTBlock::default();
     loop {
         match statement_iterator.next() {
-            Some(token) => block.push_back(
+            Some(token) => block.0.push_back(
                 parse_statement(token, statement_iterator).unwrap_or_else(|err| err.into()),
             ),
             None => {}
@@ -52,7 +47,7 @@ fn parse_block(
 
         statement_iterator
             .next_statement_should_be_empty()
-            .unwrap_or_else(|err| block.push_back(err.into()));
+            .unwrap_or_else(|err| block.0.push_back(err.into()));
 
         match statement_iterator.peek() {
             Some(token) if should_stop_at_token(token) => break,
