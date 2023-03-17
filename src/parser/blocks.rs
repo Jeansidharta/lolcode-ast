@@ -143,11 +143,11 @@ mod tests {
                 )
                 .into(),
                 VariableAssignment {
-                    identifier: VariableAccess {
+                    variable_access: VariableAccess {
                         name: (block_tokens[2][0].clone(), false).into(),
                         accesses: [].into()
                     },
-                    value: ASTExpression::LiteralValue(block_tokens[2][2].clone())
+                    expression: ASTExpression::LiteralValue(block_tokens[2][2].clone())
                 }
                 .into()
             ])
@@ -185,11 +185,11 @@ mod tests {
             ASTBlock::from([
                 IHasA::from(Identifier::from((block_tokens[0][1].clone(), false))).into(),
                 VariableAssignment {
-                    identifier: VariableAccess {
+                    variable_access: VariableAccess {
                         name: (block_tokens[1][0].clone(), false).into(),
                         accesses: [].into()
                     },
-                    value: ASTExpression::SumOf(
+                    expression: ASTExpression::SumOf(
                         Box::new(ASTExpression::VariableAccess(VariableAccess {
                             name: (block_tokens[1][3].clone(), false).into(),
                             accesses: [].into()

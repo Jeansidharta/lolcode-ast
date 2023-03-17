@@ -340,8 +340,8 @@ mod tests {
                     )
                     .into(),
                     VariableAssignment {
-                        identifier: ((block_tokens[2][0].clone(), false), []).into(),
-                        value: ASTExpression::SumOf(
+                        variable_access: ((block_tokens[2][0].clone(), false), []).into(),
+                        expression: ASTExpression::SumOf(
                             Box::new(ASTExpression::VariableAccess(
                                 ((block_tokens[2][3].clone(), false), []).into()
                             )),
@@ -409,8 +409,8 @@ mod tests {
                     )
                     .into(),
                     VariableAssignment {
-                        identifier: ((block_tokens[2][0].clone(), false), []).into(),
-                        value: ASTExpression::SumOf(
+                        variable_access: ((block_tokens[2][0].clone(), false), []).into(),
+                        expression: ASTExpression::SumOf(
                             Box::new(ASTExpression::VariableAccess(
                                 ((block_tokens[2][3].clone(), false), []).into()
                             )),
@@ -487,8 +487,8 @@ mod tests {
                     )
                     .into(),
                     VariableAssignment {
-                        identifier: ((block_tokens[2][0].clone(), false), []).into(),
-                        value: ASTExpression::SumOf(
+                        variable_access: ((block_tokens[2][0].clone(), false), []).into(),
+                        expression: ASTExpression::SumOf(
                             Box::new(ASTExpression::VariableAccess(
                                 ((block_tokens[2][3].clone(), false), []).into()
                             )),

@@ -9,9 +9,9 @@ use crate::parser::StatementIterator;
 #[derive(Debug, Clone, PartialEq)]
 pub struct VariableAssignment {
     /// The variable that will receive the value
-    pub identifier: VariableAccess,
+    pub variable_access: VariableAccess,
     /// The value that will be put in the variable
-    pub value: ASTExpression,
+    pub expression: ASTExpression,
 }
 
 /// Errors tha can only happen in a variable assignment statement
@@ -52,7 +52,10 @@ impl TryFrom<(VariableAccess, &mut StatementIterator)> for VariableAssignment {
             None => return Err(VariableAssignmentError::ExpectedValue(r_token).into()),
         };
 
-        Ok(VariableAssignment { identifier, value })
+        Ok(VariableAssignment {
+            variable_access: identifier,
+            expression: value,
+        })
     }
 }
 
@@ -88,8 +91,8 @@ mod tests {
                 &mut StatementIterator::new(operands.clone().into())
             )),
             Ok(VariableAssignment {
-                identifier: ((identifier.clone(), false), []).into(),
-                value: ASTExpression::LiteralValue(operands.get(1).unwrap().clone())
+                variable_access: ((identifier.clone(), false), []).into(),
+                expression: ASTExpression::LiteralValue(operands.get(1).unwrap().clone())
             })
         );
     }
