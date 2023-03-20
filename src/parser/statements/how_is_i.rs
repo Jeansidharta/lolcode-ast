@@ -1,6 +1,6 @@
 use crate::parser::expression::variable_access::parse_identifier;
 use crate::parser::statements::ASTErrorType;
-use crate::parser::statements::ASTNode;
+use crate::parser::statements::Node;
 use crate::parser::Identifier;
 use crate::parser::StatementIterator;
 use std::collections::VecDeque;
@@ -87,9 +87,9 @@ impl TryFrom<(Token, &mut StatementIterator)> for HowIzI {
     }
 }
 
-impl Into<ASTNode> for HowIzI {
-    fn into(self) -> ASTNode {
-        ASTNode::HowIzI(self)
+impl Into<Node> for HowIzI {
+    fn into(self) -> Node {
+        Node::HowIzI(self)
     }
 }
 

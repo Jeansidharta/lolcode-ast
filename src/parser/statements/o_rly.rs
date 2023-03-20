@@ -1,7 +1,7 @@
 use crate::parser::expression::parse_expression;
 use crate::parser::expression::ASTExpression;
 use crate::parser::statements::ASTErrorType;
-use crate::parser::statements::ASTNode;
+use crate::parser::statements::Node;
 use crate::parser::StatementIterator;
 use std::collections::VecDeque;
 
@@ -98,9 +98,9 @@ impl TryFrom<(Token, &mut StatementIterator)> for ORly {
     }
 }
 
-impl Into<ASTNode> for ORly {
-    fn into(self) -> ASTNode {
-        ASTNode::ORly(self)
+impl Into<Node> for ORly {
+    fn into(self) -> Node {
+        Node::ORly(self)
     }
 }
 

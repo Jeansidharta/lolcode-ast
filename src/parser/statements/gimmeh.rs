@@ -1,16 +1,16 @@
 use crate::lexer::Token;
 use crate::parser::expression::variable_access::parse_variable_access;
 use crate::parser::statements::ASTErrorType;
-use crate::parser::statements::ASTNode;
+use crate::parser::statements::Node;
 use crate::parser::StatementIterator;
 
 pub(crate) fn parse_gimmeh(
     first_token: Token,
     tokens: &mut StatementIterator,
-) -> Result<ASTNode, ASTErrorType> {
+) -> Result<Node, ASTErrorType> {
     match tokens.next() {
         Some(token) => {
-            parse_variable_access(token, tokens).and_then(|ident| Ok(ASTNode::Gimmeh(ident)))
+            parse_variable_access(token, tokens).and_then(|ident| Ok(Node::Gimmeh(ident)))
         }
         None => Err(ASTErrorType::MissingToken(first_token)),
     }
@@ -31,7 +31,7 @@ mod tests {
 
         assert_eq!(
             parse_gimmeh(keyword, &mut tokens.clone().into()),
-            Ok(ASTNode::Gimmeh(((tokens[0].clone(), false), []).into()))
+            Ok(Node::Gimmeh(((tokens[0].clone(), false), []).into()))
         );
     }
 

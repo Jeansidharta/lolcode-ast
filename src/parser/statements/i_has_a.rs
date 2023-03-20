@@ -4,7 +4,7 @@ use crate::parser::expression::ASTType;
 use crate::parser::expression::Identifier;
 use crate::parser::expression::{parse_expression, ASTExpression};
 use crate::parser::statements::ASTErrorType;
-use crate::parser::statements::ASTNode;
+use crate::parser::statements::Node;
 use crate::parser::StatementIterator;
 
 /// When defining a variable, it can either be initialized by value, or by type.
@@ -122,9 +122,9 @@ impl TryFrom<(Token, &mut StatementIterator)> for IHasA {
     }
 }
 
-impl Into<ASTNode> for IHasA {
-    fn into(self) -> ASTNode {
-        ASTNode::IHasA(self)
+impl Into<Node> for IHasA {
+    fn into(self) -> Node {
+        Node::IHasA(self)
     }
 }
 

@@ -1,7 +1,7 @@
 use crate::lexer::{Keywords, Token, TokenType};
 use crate::parser::expression::{parse_expression, ASTExpression};
 use crate::parser::statements::ASTErrorType;
-use crate::parser::statements::ASTNode;
+use crate::parser::statements::Node;
 use crate::parser::statements::VariableAccess;
 use crate::parser::StatementIterator;
 
@@ -13,6 +13,10 @@ pub struct VariableAssignment {
     /// The value that will be put in the variable
     pub expression: ASTExpression,
 }
+
+// impl ASTStatement for VariableAccess {
+//     fn range(&self) -> crate::lexer::Range {}
+// }
 
 /// Errors tha can only happen in a variable assignment statement
 #[derive(Debug, PartialEq, Clone)]
@@ -59,9 +63,9 @@ impl TryFrom<(VariableAccess, &mut StatementIterator)> for VariableAssignment {
     }
 }
 
-impl Into<ASTNode> for VariableAssignment {
-    fn into(self) -> ASTNode {
-        ASTNode::VariableAssignment(self)
+impl Into<Node> for VariableAssignment {
+    fn into(self) -> Node {
+        Node::VariableAssignment(self)
     }
 }
 

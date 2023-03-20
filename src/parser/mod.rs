@@ -7,6 +7,7 @@ use self::{
 
 pub use blocks::ASTBlock;
 
+mod ast_node;
 mod blocks;
 /// Expression related data structures and logic.
 pub mod expression;

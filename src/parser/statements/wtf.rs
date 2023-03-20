@@ -1,5 +1,5 @@
 use crate::parser::statements::ASTErrorType;
-use crate::parser::statements::ASTNode;
+use crate::parser::statements::Node;
 use crate::parser::StatementIterator;
 use std::collections::VecDeque;
 
@@ -67,9 +67,9 @@ impl TryFrom<(Token, &mut StatementIterator)> for Wtf {
     }
 }
 
-impl Into<ASTNode> for Wtf {
-    fn into(self) -> ASTNode {
-        ASTNode::Wtf(self)
+impl Into<Node> for Wtf {
+    fn into(self) -> Node {
+        Node::Wtf(self)
     }
 }
 

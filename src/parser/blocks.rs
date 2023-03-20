@@ -1,4 +1,4 @@
-use crate::parser::statements::ASTNode;
+use crate::parser::statements::Node;
 use std::collections::VecDeque;
 
 use crate::parser::StatementIterator;
@@ -6,10 +6,15 @@ use crate::parser::StatementIterator;
 use crate::lexer::{Keywords, Token, TokenType};
 
 use super::parse_statement;
+use super::statements::how_is_i::HowIzI;
+use super::statements::im_in_yr::ImInYr;
+use super::statements::o_rly::ORly;
+use super::statements::wtf::Wtf;
+use super::statements::ASTErrorType;
 
 /// A block of code, which is an array of statements
 #[derive(Debug, PartialEq, Clone)]
-pub struct ASTBlock(pub VecDeque<ASTNode>);
+pub struct ASTBlock(pub VecDeque<Node>);
 
 impl Default for ASTBlock {
     fn default() -> Self {
@@ -17,15 +22,100 @@ impl Default for ASTBlock {
     }
 }
 
-impl<const T: usize> From<[ASTNode; T]> for ASTBlock {
-    fn from(value: [ASTNode; T]) -> Self {
+impl<const T: usize> From<[Node; T]> for ASTBlock {
+    fn from(value: [Node; T]) -> Self {
         Self(VecDeque::from(value))
     }
 }
 
+struct ASTBlockErrorIterator<'a> {
+    blocks: Vec<&'a ASTBlock>,
+    current_block_index: usize,
+    current_block_statement: usize,
+}
+
+impl<'a> ASTBlockErrorIterator<'a> {
+    pub fn new(first_block: &'a ASTBlock) -> ASTBlockErrorIterator<'a> {
+        ASTBlockErrorIterator {
+            blocks: vec![first_block],
+            current_block_index: 0,
+            current_block_statement: 0,
+        }
+    }
+}
+
+impl Node {
+    pub fn get_inner_block(&self) -> Option<Vec<&ASTBlock>> {
+        match self {
+            Node::Wtf(Wtf { omg, omg_wtf }) => {
+                let mut vec: Vec<&ASTBlock> = omg.iter().map(|(_, block)| block).collect();
+                omg_wtf.as_ref().map(|block| vec.push(block));
+                Some(vec)
+            }
+            Node::ORly(ORly {
+                if_true,
+                if_false,
+                mebbes,
+            }) => {
+                let mut vec: Vec<&ASTBlock> = vec![];
+                if_true.as_ref().map(|block| vec.push(block));
+                mebbes.iter().for_each(|(_, block)| vec.push(block));
+                if_false.as_ref().map(|block| vec.push(block));
+                Some(vec)
+            }
+            Node::ImInYr(ImInYr { code_block, .. }) => Some(vec![code_block]),
+            Node::HowIzI(HowIzI { body, .. }) => Some(vec![body]),
+            _ => None,
+        }
+    }
+}
+
+enum ASTErrorOrBlock<'a> {
+    Error(&'a ASTErrorType),
+    Block(Vec<&'a ASTBlock>),
+}
+
+impl<'a> Iterator for ASTBlockErrorIterator<'a> {
+    type Item = ASTErrorType;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let _block_node = self
+            .blocks
+            .iter()
+            .skip(self.current_block_index)
+            .find_map(|block| {
+                block
+                    .0
+                    .iter()
+                    .skip(self.current_block_statement)
+                    .find_map(|node| {
+                        self.current_block_statement += 1;
+                        node.get_inner_block()
+                            .map(|block| ASTErrorOrBlock::Block(block))
+                            .or_else(|| match node {
+                                Node::ASTError(error) => Some(ASTErrorOrBlock::Error(error)),
+                                _ => None,
+                            })
+                    })
+                    .or_else(|| {
+                        self.current_block_index += 1;
+                        None
+                    })
+            });
+
+        todo!()
+    }
+}
+
+impl ASTBlock {
+    pub fn iter_errors(&self) -> impl Iterator + '_ {
+        ASTBlockErrorIterator::new(self)
+    }
+}
+
 impl IntoIterator for ASTBlock {
-    type Item = ASTNode;
-    type IntoIter = std::collections::vec_deque::IntoIter<ASTNode>;
+    type Item = Node;
+    type IntoIter = std::collections::vec_deque::IntoIter<Node>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.0.into_iter()
@@ -198,7 +288,7 @@ mod tests {
                     )
                 }
                 .into(),
-                ASTNode::FoundYr(ASTExpression::VariableAccess(VariableAccess {
+                Node::FoundYr(ASTExpression::VariableAccess(VariableAccess {
                     name: (block_tokens[2][1].clone(), false).into(),
                     accesses: [].into()
                 }))

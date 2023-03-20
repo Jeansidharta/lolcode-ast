@@ -89,7 +89,7 @@ pub mod wtf;
 /// An AST node that represents a LOLCODE statement.
 #[allow(missing_docs)]
 #[derive(Debug, PartialEq, Clone)]
-pub enum ASTNode {
+pub enum Node {
     IHasA(IHasA),
     HAI(Hai),
     ImInYr(ImInYr),
@@ -108,29 +108,29 @@ pub enum ASTNode {
     KTHXBYE(Token),
 }
 
-impl<T: Into<ASTNode>> From<Result<T, ASTErrorType>> for ASTNode {
+impl<T: Into<Node>> From<Result<T, ASTErrorType>> for Node {
     fn from(value: Result<T, ASTErrorType>) -> Self {
         match value {
-            Err(err) => ASTNode::ASTError(err),
+            Err(err) => Node::ASTError(err),
             Ok(val) => val.into(),
         }
     }
 }
 
-impl From<ASTErrorType> for ASTNode {
+impl From<ASTErrorType> for Node {
     fn from(value: ASTErrorType) -> Self {
-        ASTNode::ASTError(value)
+        Node::ASTError(value)
     }
 }
 
 pub(crate) fn parse_statement(
     first_token: Token,
     tokens: &mut StatementIterator,
-) -> Result<ASTNode, ASTErrorType> {
+) -> Result<Node, ASTErrorType> {
     if is_valid_variable_access(&first_token) {
         let variable_access = parse_variable_access(first_token, tokens)?;
         return match tokens.peek().map(|t| &t.token_type) {
-            None => Ok(ASTNode::Expression(ASTExpression::VariableAccess(
+            None => Ok(Node::Expression(ASTExpression::VariableAccess(
                 variable_access,
             ))),
             Some(TokenType::Keyword(Keywords::R)) => {
@@ -169,6 +169,6 @@ pub(crate) fn parse_statement(
             ORly::try_from((first_token, tokens)).map(|t| t.into())
         }
         // Try to parse it as an expression
-        _ => parse_expression(first_token, tokens).map(|e| ASTNode::Expression(e)),
+        _ => parse_expression(first_token, tokens).map(|e| Node::Expression(e)),
     }
 }

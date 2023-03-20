@@ -1,5 +1,5 @@
 use crate::parser::statements::ASTErrorType;
-use crate::parser::statements::ASTNode;
+use crate::parser::statements::Node;
 use std::collections::VecDeque;
 
 use crate::lexer::Token;
@@ -9,9 +9,9 @@ use crate::parser::StatementIterator;
 #[derive(Debug, Clone, PartialEq)]
 pub struct Hai(pub VecDeque<Token>);
 
-impl Into<ASTNode> for Hai {
-    fn into(self) -> ASTNode {
-        ASTNode::HAI(self)
+impl Into<Node> for Hai {
+    fn into(self) -> Node {
+        Node::HAI(self)
     }
 }
 

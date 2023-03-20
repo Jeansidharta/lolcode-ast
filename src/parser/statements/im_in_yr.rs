@@ -5,7 +5,7 @@ use crate::parser::expression::variable_access::parse_variable_access;
 use crate::parser::expression::VariableAccess;
 use crate::parser::statements::ASTErrorType;
 use crate::parser::statements::ASTExpression;
-use crate::parser::statements::ASTNode;
+use crate::parser::statements::Node;
 use crate::parser::ASTBlock;
 use crate::parser::StatementIterator;
 
@@ -275,9 +275,9 @@ impl TryFrom<(Token, &mut StatementIterator)> for ImInYr {
     }
 }
 
-impl Into<ASTNode> for ImInYr {
-    fn into(self) -> ASTNode {
-        ASTNode::ImInYr(self)
+impl Into<Node> for ImInYr {
+    fn into(self) -> Node {
+        Node::ImInYr(self)
     }
 }
 
