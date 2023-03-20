@@ -234,7 +234,7 @@ mod tests {
                 .into(),
                 VariableAssignment {
                     variable_access: VariableAccess {
-                        name: (block_tokens[2][0].clone(), false).into(),
+                        identifier: (block_tokens[2][0].clone(), false).into(),
                         accesses: [].into()
                     },
                     expression: ASTExpression::LiteralValue(block_tokens[2][2].clone())
@@ -276,12 +276,12 @@ mod tests {
                 IHasA::from(Identifier::from((block_tokens[0][1].clone(), false))).into(),
                 VariableAssignment {
                     variable_access: VariableAccess {
-                        name: (block_tokens[1][0].clone(), false).into(),
+                        identifier: (block_tokens[1][0].clone(), false).into(),
                         accesses: [].into()
                     },
                     expression: ASTExpression::SumOf(
                         Box::new(ASTExpression::VariableAccess(VariableAccess {
-                            name: (block_tokens[1][3].clone(), false).into(),
+                            identifier: (block_tokens[1][3].clone(), false).into(),
                             accesses: [].into()
                         },)),
                         Box::new(ASTExpression::LiteralValue(block_tokens[1][5].clone()))
@@ -289,7 +289,7 @@ mod tests {
                 }
                 .into(),
                 Node::FoundYr(ASTExpression::VariableAccess(VariableAccess {
-                    name: (block_tokens[2][1].clone(), false).into(),
+                    identifier: (block_tokens[2][1].clone(), false).into(),
                     accesses: [].into()
                 }))
             ])

@@ -16,7 +16,7 @@ use crate::lexer::{Token, TokenType};
 #[derive(Debug, PartialEq, Clone)]
 pub struct VariableAccess {
     /// The first identifier used.
-    pub name: Identifier,
+    pub identifier: Identifier,
     /// The other identifiers used after the
     /// BukkitSlotAccess
     pub accesses: VecDeque<Identifier>,
@@ -27,14 +27,14 @@ impl VariableAccess {
         self.accesses
             .pop_back()
             .map(|ident| ident.name)
-            .unwrap_or_else(|| self.name.name)
+            .unwrap_or_else(|| self.identifier.name)
     }
 }
 
 impl<const T: usize> From<((Token, bool), [(Token, bool); T])> for VariableAccess {
     fn from((name, accesses): ((Token, bool), [(Token, bool); T])) -> Self {
         VariableAccess {
-            name: name.into(),
+            identifier: name.into(),
             accesses: accesses.into_iter().map(|a| a.into()).collect(),
         }
     }
@@ -77,7 +77,7 @@ pub(crate) fn parse_variable_access(
     }
 
     Ok(VariableAccess {
-        name: first_ident,
+        identifier: first_ident,
         accesses,
     })
 }

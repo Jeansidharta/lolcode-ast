@@ -15,7 +15,7 @@ fn binary_normal_usecase() {
         Ok((
             Box::new(ASTExpression::LiteralValue(operands[0].clone())),
             Box::new(ASTExpression::VariableAccess(VariableAccess {
-                name: (operands[2].clone(), false).into(),
+                identifier: (operands[2].clone(), false).into(),
                 accesses: [].into()
             })),
         ))
@@ -35,7 +35,7 @@ fn binary_no_an() {
         Ok((
             Box::new(ASTExpression::LiteralValue(operands[0].clone())),
             Box::new(ASTExpression::VariableAccess(VariableAccess {
-                name: (operands[1].clone(), false).into(),
+                identifier: (operands[1].clone(), false).into(),
                 accesses: [].into()
             })),
         ))
@@ -57,7 +57,7 @@ fn binary_trailling_an() {
         Ok((
             Box::new(ASTExpression::LiteralValue(operands[0].clone())),
             Box::new(ASTExpression::VariableAccess(VariableAccess {
-                name: (operands[2].clone(), false).into(),
+                identifier: (operands[2].clone(), false).into(),
                 accesses: [].into()
             })),
         ))
