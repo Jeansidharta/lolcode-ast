@@ -79,7 +79,10 @@ mod tests {
     use super::*;
     use crate::{
         lexer::{Keywords, TokenType, TokenValue},
-        parser::statements::visible::Visible,
+        parser::{
+            expression::{ASTExpressionValue, Identifier, VariableAccess},
+            statements::visible::Visible,
+        },
     };
     use pretty_assertions::assert_eq;
 
@@ -120,41 +123,48 @@ mod tests {
         assert_eq!(
             Wtf::try_from((first_token, &mut block_tokens.clone().into())),
             Ok(Wtf {
-                omg: [
+                omg: VecDeque::from([
                     (
-                        ASTExpression::LiteralValue(block_tokens[1][1].clone()),
-                        [Visible(
-                            [ASTExpression::VariableAccess(
-                                ((block_tokens[2][1].clone(), false), []).into(),
-                            )]
-                            .into(),
+                        ASTExpression::Value(ASTExpressionValue::LiteralValue(
+                            block_tokens[1][1].clone(),
+                        )),
+                        ASTBlock(VecDeque::from([Node::Visible(Visible(
+                            VecDeque::from([ASTExpression::Value(
+                                ASTExpressionValue::VariableAccess(VariableAccess {
+                                    identifier: Identifier {
+                                        name: block_tokens[2][1].clone(),
+                                        srs: None,
+                                    },
+                                    accesses: VecDeque::new()
+                                })
+                            )]),
                             None
-                        )
-                        .into()]
-                        .into()
+                        ))])),
                     ),
                     (
-                        ASTExpression::LiteralValue(block_tokens[3][1].clone()),
-                        [Visible(
-                            [ASTExpression::VariableAccess(
-                                ((block_tokens[4][1].clone(), false), []).into(),
-                            )]
-                            .into(),
+                        ASTExpression::Value(ASTExpressionValue::LiteralValue(
+                            block_tokens[3][1].clone(),
+                        )),
+                        ASTBlock(VecDeque::from([Node::Visible(Visible(
+                            VecDeque::from([ASTExpression::Value(
+                                ASTExpressionValue::VariableAccess(VariableAccess {
+                                    identifier: Identifier {
+                                        name: block_tokens[4][0].clone(),
+                                        srs: None,
+                                    },
+                                    accesses: VecDeque::new()
+                                })
+                            )]),
                             None
-                        )
-                        .into()]
-                        .into()
+                        ))])),
                     )
-                ]
-                .into(),
-                omg_wtf: Some(
-                    [Visible(
-                        [ASTExpression::LiteralValue(block_tokens[5][3].clone())].into(),
-                        None
-                    )
-                    .into()]
-                    .into()
-                )
+                ]),
+                omg_wtf: Some(ASTBlock(VecDeque::from([Node::Visible(Visible(
+                    VecDeque::from([ASTExpression::Value(ASTExpressionValue::LiteralValue(
+                        block_tokens[5][3].clone()
+                    ))]),
+                    None
+                ))])))
             })
         )
     }

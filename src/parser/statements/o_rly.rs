@@ -30,12 +30,6 @@ pub enum ORlyError {
     MissingMebbeExpression(Token),
 }
 
-impl Into<ASTErrorType> for ORlyError {
-    fn into(self) -> ASTErrorType {
-        ASTErrorType::ORlyError(self)
-    }
-}
-
 impl TryFrom<(Token, &mut StatementIterator)> for ORly {
     type Error = ASTErrorType;
 
@@ -110,7 +104,10 @@ mod tests {
     use super::*;
     use crate::{
         lexer::{Keywords, NumberToken, TokenType, TokenValue},
-        parser::{expression::ASTExpression, statements::visible::Visible},
+        parser::{
+            expression::{ASTExpression, ASTExpressionValue, Identifier, VariableAccess},
+            statements::visible::Visible,
+        },
     };
     use pretty_assertions::assert_eq;
 
@@ -150,9 +147,15 @@ mod tests {
             Ok(ORly {
                 if_true: Some(
                     [Visible(
-                        [ASTExpression::VariableAccess(
-                            ((block_tokens[2][1].clone(), false), []).into(),
-                        )]
+                        [ASTExpression::Value(ASTExpressionValue::VariableAccess(
+                            VariableAccess {
+                                identifier: Identifier {
+                                    name: block_tokens[2][1].clone(),
+                                    srs: None,
+                                },
+                                accesses: VecDeque::new(),
+                            }
+                        ))]
                         .into(),
                         None
                     )
@@ -160,9 +163,14 @@ mod tests {
                     .into()
                 ),
                 mebbes: [(
-                    ASTExpression::LiteralValue(block_tokens[3][1].clone()),
+                    ASTExpression::Value(ASTExpressionValue::LiteralValue(
+                        block_tokens[3][1].clone()
+                    )),
                     [Visible(
-                        [ASTExpression::LiteralValue(block_tokens[4][1].clone())].into(),
+                        [ASTExpression::Value(ASTExpressionValue::LiteralValue(
+                            block_tokens[4][1].clone()
+                        ))]
+                        .into(),
                         None
                     )
                     .into()]
@@ -171,7 +179,10 @@ mod tests {
                 .into(),
                 if_false: Some(
                     [Visible(
-                        [ASTExpression::LiteralValue(block_tokens[5][3].clone())].into(),
+                        [ASTExpression::Value(ASTExpressionValue::LiteralValue(
+                            block_tokens[5][3].clone()
+                        ))]
+                        .into(),
                         None
                     )
                     .into()]
@@ -203,15 +214,13 @@ mod tests {
             ORly::try_from((first_token, &mut block_tokens.clone().into())),
             Ok(ORly {
                 if_true: None,
-                mebbes: [].into(),
-                if_false: Some(
-                    [Visible(
-                        [ASTExpression::LiteralValue(block_tokens[1][3].clone())].into(),
-                        None
-                    )
-                    .into()]
-                    .into()
-                ),
+                mebbes: VecDeque::new(),
+                if_false: Some(ASTBlock(VecDeque::from([Node::Visible(Visible(
+                    VecDeque::from([ASTExpression::Value(ASTExpressionValue::LiteralValue(
+                        block_tokens[1][3].clone()
+                    ))]),
+                    None
+                ))]))),
             })
         )
     }

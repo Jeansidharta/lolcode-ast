@@ -12,6 +12,8 @@ pub struct VariableAssignment {
     pub variable_access: VariableAccess,
     /// The value that will be put in the variable
     pub expression: ASTExpression,
+
+    pub(crate) r_token: Token,
 }
 
 // impl ASTStatement for VariableAccess {
@@ -59,6 +61,7 @@ impl TryFrom<(VariableAccess, &mut StatementIterator)> for VariableAssignment {
         Ok(VariableAssignment {
             variable_access: identifier,
             expression: value,
+            r_token,
         })
     }
 }
@@ -69,15 +72,14 @@ impl Into<Node> for VariableAssignment {
     }
 }
 
-impl Into<ASTErrorType> for VariableAssignmentError {
-    fn into(self) -> ASTErrorType {
-        ASTErrorType::VariableAssignmentError(self)
-    }
-}
-
 #[cfg(test)]
 mod tests {
-    use crate::lexer::*;
+    use std::collections::VecDeque;
+
+    use crate::{
+        lexer::*,
+        parser::expression::{ASTExpressionValue, Identifier},
+    };
     use pretty_assertions::assert_eq;
 
     use super::*;
@@ -91,12 +93,27 @@ mod tests {
         ]);
         assert_eq!(
             VariableAssignment::try_from((
-                ((identifier.clone(), false), []).into(),
+                VariableAccess {
+                    identifier: Identifier {
+                        name: identifier.clone(),
+                        srs: None,
+                    },
+                    accesses: VecDeque::new()
+                },
                 &mut StatementIterator::new(operands.clone().into())
             )),
             Ok(VariableAssignment {
-                variable_access: ((identifier.clone(), false), []).into(),
-                expression: ASTExpression::LiteralValue(operands.get(1).unwrap().clone())
+                variable_access: VariableAccess {
+                    identifier: Identifier {
+                        name: identifier.clone(),
+                        srs: None,
+                    },
+                    accesses: VecDeque::new()
+                },
+                r_token: operands[0].clone(),
+                expression: ASTExpression::Value(ASTExpressionValue::LiteralValue(
+                    operands[1].clone()
+                ))
             })
         );
     }
@@ -109,7 +126,13 @@ mod tests {
         ]);
         assert_eq!(
             VariableAssignment::try_from((
-                ((identifier.clone(), false), []).into(),
+                VariableAccess {
+                    identifier: Identifier {
+                        name: identifier.clone(),
+                        srs: None,
+                    },
+                    accesses: VecDeque::new()
+                },
                 &mut StatementIterator::new(operands.clone().into())
             )),
             Err(VariableAssignmentError::MissingR(identifier).into())

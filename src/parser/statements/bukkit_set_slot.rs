@@ -41,7 +41,7 @@ impl TryFrom<(VariableAccess, &mut StatementIterator)> for BukkitSetSlot {
         let slot_name = match tokens.next() {
             Some(initial_token) => parse_identifier(initial_token, tokens)?,
             None => {
-                return Err(ASTErrorType::VariableAssignmentError(
+                return Err(ASTErrorType::VariableAssignment(
                     VariableAssignmentError::ExpectedValue(has_a_token),
                 ))
             }
@@ -80,7 +80,9 @@ impl Into<Node> for BukkitSetSlot {
 #[cfg(test)]
 mod tests {
 
-    use crate::lexer::*;
+    use std::collections::VecDeque;
+
+    use crate::{lexer::*, parser::expression::ASTExpressionValue};
     use pretty_assertions::assert_eq;
 
     use super::*;
@@ -96,13 +98,28 @@ mod tests {
         ]);
         assert_eq!(
             BukkitSetSlot::try_from((
-                ((identifier.clone(), false), []).into(),
+                VariableAccess {
+                    identifier: Identifier {
+                        name: identifier.clone(),
+                        srs: None
+                    },
+                    accesses: VecDeque::new(),
+                },
                 &mut StatementIterator::new(operands.clone().into())
             )),
             Ok(BukkitSetSlot {
-                bukkit: ((identifier.clone(), false), []).into(),
-                slot_name: (operands[1].clone(), false).into(),
-                value: ASTExpression::LiteralValue(operands[3].clone())
+                bukkit: VariableAccess {
+                    identifier: Identifier {
+                        name: identifier.clone(),
+                        srs: None
+                    },
+                    accesses: VecDeque::new()
+                },
+                slot_name: Identifier {
+                    name: operands[1].clone(),
+                    srs: None
+                },
+                value: ASTExpression::Value(ASTExpressionValue::LiteralValue(operands[3].clone()))
             })
         );
     }

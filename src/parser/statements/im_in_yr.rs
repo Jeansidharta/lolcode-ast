@@ -64,12 +64,6 @@ pub enum ImInYrError {
     MissingConditionalExpression(Token),
 }
 
-impl Into<ASTErrorType> for ImInYrError {
-    fn into(self) -> ASTErrorType {
-        ASTErrorType::ImInYr(self)
-    }
-}
-
 #[derive(Debug, PartialEq, Clone)]
 /// The operation used in the loop.
 pub enum LoopOperation {
@@ -289,7 +283,10 @@ mod tests {
     use super::*;
     use crate::{
         lexer::{Keywords, NumberToken, TokenType, TokenValue},
-        parser::statements::{assignment::VariableAssignment, visible::Visible},
+        parser::{
+            expression::{ASTExpressionValue, BinaryOperation, BinaryOpt, Identifier},
+            statements::{assignment::VariableAssignment, visible::Visible},
+        },
     };
     use pretty_assertions::assert_eq;
 
@@ -328,27 +325,49 @@ mod tests {
                 on_iteration: None,
                 condition: None,
                 code_block: [
-                    Visible(
-                        [
-                            ASTExpression::LiteralValue(block_tokens[1][1].clone()),
-                            ASTExpression::VariableAccess(
-                                ((block_tokens[1][2].clone(), false), []).into()
-                            )
-                        ]
-                        .into(),
-                        None
-                    )
-                    .into(),
-                    VariableAssignment {
-                        variable_access: ((block_tokens[2][0].clone(), false), []).into(),
-                        expression: ASTExpression::SumOf(
-                            Box::new(ASTExpression::VariableAccess(
-                                ((block_tokens[2][3].clone(), false), []).into()
+                    Node::Visible(Visible(
+                        VecDeque::from([
+                            ASTExpression::Value(ASTExpressionValue::LiteralValue(
+                                block_tokens[1][1].clone()
                             )),
-                            Box::new(ASTExpression::LiteralValue(block_tokens[2][5].clone()))
-                        )
-                    }
-                    .into()
+                            ASTExpression::Value(ASTExpressionValue::VariableAccess(
+                                VariableAccess {
+                                    identifier: Identifier {
+                                        name: block_tokens[1][2].clone(),
+                                        srs: None,
+                                    },
+                                    accesses: VecDeque::new(),
+                                }
+                            ))
+                        ]),
+                        None
+                    )),
+                    Node::VariableAssignment(VariableAssignment {
+                        variable_access: VariableAccess {
+                            identifier: Identifier {
+                                name: block_tokens[2][0].clone(),
+                                srs: None
+                            },
+                            accesses: VecDeque::new(),
+                        },
+                        r_token: block_tokens[2][1].clone(),
+                        expression: ASTExpression::BinaryOperation(BinaryOperation {
+                            operator: BinaryOpt::SumOf(block_tokens[2][2].clone()),
+                            left: Box::new(ASTExpression::Value(
+                                ASTExpressionValue::VariableAccess(VariableAccess {
+                                    identifier: Identifier {
+                                        name: block_tokens[2][3].clone(),
+                                        srs: None
+                                    },
+                                    accesses: VecDeque::new(),
+                                })
+                            )),
+                            an_token: Some(block_tokens[2][4].clone()),
+                            right: Box::new(ASTExpression::Value(
+                                ASTExpressionValue::LiteralValue(block_tokens[2][5].clone())
+                            ))
+                        })
+                    })
                 ]
                 .into(),
                 end_label: block_tokens[3][1].clone()
@@ -394,28 +413,59 @@ mod tests {
                 condition: None,
                 on_iteration: Some(LoopIterationOperation {
                     operation: LoopOperation::UPPIN(block_tokens[0][1].clone()),
-                    operand: ((block_tokens[0][3].clone(), false), []).into(),
+                    operand: VariableAccess {
+                        identifier: Identifier {
+                            name: block_tokens[0][3].clone(),
+                            srs: None
+                        },
+                        accesses: VecDeque::new()
+                    }
                 }),
                 code_block: [
                     Visible(
                         [
-                            ASTExpression::LiteralValue(block_tokens[1][1].clone()),
-                            ASTExpression::VariableAccess(
-                                ((block_tokens[1][2].clone(), false), []).into()
-                            )
+                            ASTExpression::Value(ASTExpressionValue::LiteralValue(
+                                block_tokens[1][1].clone()
+                            )),
+                            ASTExpression::Value(ASTExpressionValue::VariableAccess(
+                                VariableAccess {
+                                    identifier: Identifier {
+                                        name: block_tokens[1][2].clone(),
+                                        srs: None
+                                    },
+                                    accesses: VecDeque::new()
+                                }
+                            ))
                         ]
                         .into(),
                         None
                     )
                     .into(),
                     VariableAssignment {
-                        variable_access: ((block_tokens[2][0].clone(), false), []).into(),
-                        expression: ASTExpression::SumOf(
-                            Box::new(ASTExpression::VariableAccess(
-                                ((block_tokens[2][3].clone(), false), []).into()
+                        variable_access: VariableAccess {
+                            identifier: Identifier {
+                                name: block_tokens[2][0].clone(),
+                                srs: None
+                            },
+                            accesses: VecDeque::new(),
+                        },
+                        r_token: block_tokens[2][1].clone(),
+                        expression: ASTExpression::BinaryOperation(BinaryOperation {
+                            operator: BinaryOpt::SumOf(block_tokens[2][2].clone()),
+                            left: Box::new(ASTExpression::Value(
+                                ASTExpressionValue::VariableAccess(VariableAccess {
+                                    identifier: Identifier {
+                                        name: block_tokens[2][3].clone(),
+                                        srs: None
+                                    },
+                                    accesses: VecDeque::new(),
+                                },)
                             )),
-                            Box::new(ASTExpression::LiteralValue(block_tokens[2][5].clone()))
-                        )
+                            an_token: Some(block_tokens[2][4].clone()),
+                            right: Box::new(ASTExpression::Value(
+                                ASTExpressionValue::LiteralValue(block_tokens[2][5].clone())
+                            ))
+                        })
                     }
                     .into()
                 ]
@@ -465,35 +515,78 @@ mod tests {
             ImInYr::try_from((first_token, &mut block_tokens.clone().into())),
             Ok(ImInYr {
                 label: block_tokens[0][0].clone(),
-                condition: Some(LoopCondition::TIL(ASTExpression::BothSaem(
-                    Box::new(ASTExpression::VariableAccess(
-                        ((block_tokens[0][6].clone(), false), []).into()
-                    )),
-                    Box::new(ASTExpression::LiteralValue(block_tokens[0][8].clone())),
+                condition: Some(LoopCondition::TIL(ASTExpression::BinaryOperation(
+                    BinaryOperation {
+                        operator: BinaryOpt::BothSaem(block_tokens[0][5].clone()),
+                        left: Box::new(ASTExpression::Value(ASTExpressionValue::VariableAccess(
+                            VariableAccess {
+                                identifier: Identifier {
+                                    name: block_tokens[0][6].clone(),
+                                    srs: None,
+                                },
+                                accesses: VecDeque::new(),
+                            }
+                        ))),
+                        an_token: Some(block_tokens[0][7].clone()),
+                        right: Box::new(ASTExpression::Value(ASTExpressionValue::LiteralValue(
+                            block_tokens[0][8].clone()
+                        ))),
+                    }
                 ))),
                 on_iteration: Some(LoopIterationOperation {
                     operation: LoopOperation::UPPIN(block_tokens[0][1].clone()),
-                    operand: ((block_tokens[0][3].clone(), false), []).into(),
+                    operand: VariableAccess {
+                        identifier: Identifier {
+                            name: block_tokens[0][3].clone(),
+                            srs: None
+                        },
+                        accesses: VecDeque::new()
+                    }
                 }),
                 code_block: [
                     Visible(
                         VecDeque::from([
-                            ASTExpression::LiteralValue(block_tokens[1][1].clone()),
-                            ASTExpression::VariableAccess(
-                                ((block_tokens[1][2].clone(), false), []).into()
-                            )
+                            ASTExpression::Value(ASTExpressionValue::LiteralValue(
+                                block_tokens[1][1].clone()
+                            )),
+                            ASTExpression::Value(ASTExpressionValue::VariableAccess(
+                                VariableAccess {
+                                    identifier: Identifier {
+                                        name: block_tokens[1][2].clone(),
+                                        srs: None
+                                    },
+                                    accesses: VecDeque::new(),
+                                }
+                            ))
                         ]),
                         None
                     )
                     .into(),
                     VariableAssignment {
-                        variable_access: ((block_tokens[2][0].clone(), false), []).into(),
-                        expression: ASTExpression::SumOf(
-                            Box::new(ASTExpression::VariableAccess(
-                                ((block_tokens[2][3].clone(), false), []).into()
+                        variable_access: VariableAccess {
+                            identifier: Identifier {
+                                name: block_tokens[2][0].clone(),
+                                srs: None
+                            },
+                            accesses: VecDeque::new()
+                        },
+                        r_token: block_tokens[2][1].clone(),
+                        expression: ASTExpression::BinaryOperation(BinaryOperation {
+                            operator: BinaryOpt::SumOf(block_tokens[2][2].clone()),
+                            left: Box::new(ASTExpression::Value(
+                                ASTExpressionValue::VariableAccess(VariableAccess {
+                                    identifier: Identifier {
+                                        name: block_tokens[2][3].clone(),
+                                        srs: None
+                                    },
+                                    accesses: VecDeque::new(),
+                                },)
                             )),
-                            Box::new(ASTExpression::LiteralValue(block_tokens[2][5].clone()))
-                        )
+                            an_token: Some(block_tokens[2][4].clone()),
+                            right: Box::new(ASTExpression::Value(
+                                ASTExpressionValue::LiteralValue(block_tokens[2][5].clone())
+                            ))
+                        })
                     }
                     .into()
                 ]

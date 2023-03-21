@@ -28,12 +28,6 @@ pub enum IHasAError {
     ExpectedInitialValue(Token),
 }
 
-impl Into<ASTErrorType> for IHasAError {
-    fn into(self) -> ASTErrorType {
-        ASTErrorType::IHasA(self)
-    }
-}
-
 impl From<ASTExpression> for IHasAInitialValue {
     fn from(value: ASTExpression) -> Self {
         IHasAInitialValue::Expression(value)
@@ -49,6 +43,7 @@ impl From<ASTType> for IHasAInitialValue {
 /// The variable definition statement
 #[derive(Debug, Clone, PartialEq)]
 pub struct IHasA {
+    pub(crate) i_has_a_token: Token,
     /// The variable that'll be defined
     pub identifier: Identifier,
     /// The variable's initial value or type
@@ -77,6 +72,7 @@ impl TryFrom<(Token, &mut StatementIterator)> for IHasA {
         let assignment_token = match tokens.next() {
             None => {
                 return Ok(IHasA {
+                    i_has_a_token: first_token,
                     identifier,
                     initial_value: None,
                 });
@@ -116,6 +112,7 @@ impl TryFrom<(Token, &mut StatementIterator)> for IHasA {
         };
 
         Ok(IHasA {
+            i_has_a_token: first_token,
             identifier,
             initial_value: Some(initial_value),
         })
@@ -131,35 +128,8 @@ impl Into<Node> for IHasA {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::lexer::*;
+    use crate::{lexer::*, parser::expression::ASTExpressionValue};
     use pretty_assertions::assert_eq;
-
-    impl From<(Identifier, ASTExpression)> for IHasA {
-        fn from((identifier, expression): (Identifier, ASTExpression)) -> Self {
-            IHasA {
-                identifier,
-                initial_value: Some(expression.into()),
-            }
-        }
-    }
-
-    impl From<(Identifier, ASTType)> for IHasA {
-        fn from((identifier, ast_type): (Identifier, ASTType)) -> Self {
-            IHasA {
-                identifier,
-                initial_value: Some(ast_type.into()),
-            }
-        }
-    }
-
-    impl From<Identifier> for IHasA {
-        fn from(identifier: Identifier) -> Self {
-            IHasA {
-                identifier,
-                initial_value: None,
-            }
-        }
-    }
 
     #[test]
     fn missing_identifier() {
@@ -264,8 +234,14 @@ mod tests {
         assert_eq!(
             IHasA::try_from((first_token.clone(), &mut tokens.clone().into())),
             Ok(IHasA {
-                identifier: (tokens[0].clone(), false).into(),
-                initial_value: Some(ASTExpression::LiteralValue(tokens[2].clone()).into())
+                i_has_a_token: first_token.clone(),
+                identifier: Identifier {
+                    name: tokens[0].clone(),
+                    srs: None
+                },
+                initial_value: Some(IHasAInitialValue::Expression(ASTExpression::Value(
+                    ASTExpressionValue::LiteralValue(tokens[2].clone())
+                )))
             })
         );
     }
@@ -282,8 +258,12 @@ mod tests {
         assert_eq!(
             IHasA::try_from((first_token.clone(), &mut tokens.clone().into())),
             Ok(IHasA {
-                identifier: (tokens[0].clone(), false).into(),
-                initial_value: Some(ASTType::Yarn.into())
+                i_has_a_token: first_token.clone(),
+                identifier: Identifier {
+                    name: tokens[0].clone(),
+                    srs: None
+                },
+                initial_value: Some(IHasAInitialValue::Type(ASTType::Yarn))
             })
         );
     }

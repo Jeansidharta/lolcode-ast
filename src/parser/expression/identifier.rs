@@ -5,8 +5,8 @@ use crate::lexer::{Token, TokenType};
 pub struct Identifier {
     /// The identifier token
     pub name: Token,
-    /// If there was a SRS token before this identifier.
-    pub is_srs: bool,
+    /// `Some(token)` if there was a SRS token behind the name. None if there wasn't.
+    pub srs: Option<Token>,
 }
 
 impl Identifier {

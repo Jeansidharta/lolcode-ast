@@ -9,17 +9,12 @@ pub use blocks::ASTBlock;
 
 mod ast_node;
 mod blocks;
+mod error;
 /// Expression related data structures and logic.
 pub mod expression;
 mod statement_iterator;
 /// Statement related data structures and logic
 pub mod statements;
-
-impl From<(Token, bool)> for Identifier {
-    fn from((name, is_srs): (Token, bool)) -> Self {
-        Self { name, is_srs }
-    }
-}
 
 /// Transforms an array of tokens into an ASTBlock, which is an array of statements.
 pub fn parse(tokens: Vec<Token>) -> ASTBlock {

@@ -1,5 +1,6 @@
 use crate::lexer::Keywords;
-use crate::parser::statements::error_type::ASTErrorType;
+use crate::lexer::Position;
+use crate::parser::error::ASTErrorType;
 use crate::parser::Identifier;
 use crate::parser::StatementIterator;
 use std::collections::VecDeque;
@@ -29,14 +30,9 @@ impl VariableAccess {
             .map(|ident| ident.name)
             .unwrap_or_else(|| self.identifier.name)
     }
-}
 
-impl<const T: usize> From<((Token, bool), [(Token, bool); T])> for VariableAccess {
-    fn from((name, accesses): ((Token, bool), [(Token, bool); T])) -> Self {
-        VariableAccess {
-            identifier: name.into(),
-            accesses: accesses.into_iter().map(|a| a.into()).collect(),
-        }
+    pub(crate) fn range(&self) -> (&Position, &Position) {
+        todo!()
     }
 }
 
@@ -45,15 +41,21 @@ pub(crate) fn parse_identifier(
     tokens: &mut StatementIterator,
 ) -> Result<Identifier, ASTErrorType> {
     match first_token.token_type {
-        TokenType::Identifier(_) => Ok((first_token, false).into()),
+        TokenType::Identifier(_) => Ok(Identifier {
+            name: first_token,
+            srs: None,
+        }),
         TokenType::Keyword(Keywords::SRS) => match tokens.next() {
             None => Err(ASTErrorType::MissingToken(first_token)),
             Some(
-                token @ Token {
+                name_token @ Token {
                     token_type: TokenType::Identifier(_),
                     ..
                 },
-            ) => Ok((token, true).into()),
+            ) => Ok(Identifier {
+                name: name_token,
+                srs: Some(first_token),
+            }),
             Some(token) => Err(ASTErrorType::UnexpectedToken(token)),
         },
         _ => Err(ASTErrorType::UnexpectedToken(first_token)),

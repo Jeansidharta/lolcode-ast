@@ -34,7 +34,13 @@ impl Into<Node> for Visible {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::lexer::{Keywords, NumberToken::Int, Token, TokenValue};
+    use crate::{
+        lexer::{Keywords, NumberToken::Int, Token, TokenValue},
+        parser::expression::{
+            ASTExpressionValue, BinaryOperation, BinaryOpt, Identifier, NaryOperation, NaryOpt,
+            VariableAccess,
+        },
+    };
     use pretty_assertions::assert_eq;
 
     #[test]
@@ -47,7 +53,10 @@ mod tests {
         assert_eq!(
             Visible::try_from(&mut tokens.clone().into()),
             Ok(Visible(
-                [ASTExpression::LiteralValue(tokens[0].clone())].into(),
+                [ASTExpression::Value(ASTExpressionValue::LiteralValue(
+                    tokens[0].clone()
+                ))]
+                .into(),
                 None
             ))
         );
@@ -64,7 +73,10 @@ mod tests {
         assert_eq!(
             Visible::try_from(&mut tokens.clone().into()),
             Ok(Visible(
-                [ASTExpression::LiteralValue(tokens[0].clone())].into(),
+                [ASTExpression::Value(ASTExpressionValue::LiteralValue(
+                    tokens[0].clone()
+                ))]
+                .into(),
                 Some(tokens[1].clone())
             ))
         );
@@ -115,26 +127,61 @@ mod tests {
         assert_eq!(
             Visible::try_from(&mut StatementIterator::new(tokens.clone().into())),
             Ok(Visible(
-                [
-                    ASTExpression::Smoosh(
-                        [
-                            ASTExpression::LiteralValue(tokens[1].clone()),
-                            ASTExpression::SumOf(
-                                Box::new(ASTExpression::LiteralValue(tokens[4].clone())),
-                                Box::new(ASTExpression::LiteralValue(tokens[5].clone()))
+                VecDeque::from([
+                    ASTExpression::NaryOperation(NaryOperation {
+                        operator: NaryOpt::Smoosh(tokens[0].clone()),
+                        expressions: vec![
+                            (
+                                ASTExpression::Value(ASTExpressionValue::LiteralValue(
+                                    tokens[1].clone(),
+                                )),
+                                Some(tokens[2].clone())
                             ),
-                            ASTExpression::VariableAccess(((tokens[6].clone(), false), []).into())
-                        ]
-                        .into()
-                    ),
-                    ASTExpression::EitherOf(
-                        Box::new(ASTExpression::VariableAccess(
-                            ((tokens[9].clone(), false), []).into()
-                        )),
-                        Box::new(ASTExpression::LiteralValue(tokens[11].clone()))
-                    )
-                ]
-                .into(),
+                            (
+                                ASTExpression::BinaryOperation(BinaryOperation {
+                                    operator: BinaryOpt::SumOf(tokens[3].clone()),
+                                    left: Box::new(ASTExpression::Value(
+                                        ASTExpressionValue::LiteralValue(tokens[4].clone())
+                                    )),
+                                    an_token: None,
+                                    right: Box::new(ASTExpression::Value(
+                                        ASTExpressionValue::LiteralValue(tokens[5].clone())
+                                    ))
+                                }),
+                                None
+                            ),
+                            (
+                                ASTExpression::Value(ASTExpressionValue::VariableAccess(
+                                    VariableAccess {
+                                        identifier: Identifier {
+                                            name: tokens[6].clone(),
+                                            srs: None
+                                        },
+                                        accesses: VecDeque::new()
+                                    }
+                                )),
+                                None
+                            )
+                        ],
+                        mkay_token: Some(tokens[7].clone()),
+                    }),
+                    ASTExpression::BinaryOperation(BinaryOperation {
+                        operator: BinaryOpt::EitherOf(tokens[8].clone()),
+                        left: Box::new(ASTExpression::Value(ASTExpressionValue::VariableAccess(
+                            VariableAccess {
+                                identifier: Identifier {
+                                    name: tokens[9].clone(),
+                                    srs: None,
+                                },
+                                accesses: VecDeque::new(),
+                            }
+                        ))),
+                        an_token: Some(tokens[10].clone()),
+                        right: Box::new(ASTExpression::Value(ASTExpressionValue::LiteralValue(
+                            tokens[11].clone()
+                        ))),
+                    })
+                ]),
                 Some(tokens[12].clone())
             ))
         );

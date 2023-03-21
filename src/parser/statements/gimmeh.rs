@@ -18,8 +18,13 @@ pub(crate) fn parse_gimmeh(
 
 #[cfg(test)]
 mod tests {
+    use std::collections::VecDeque;
+
     use super::*;
-    use crate::lexer::{Keywords, TokenType, TokenValue::NOOB};
+    use crate::{
+        lexer::{Keywords, TokenType, TokenValue::NOOB},
+        parser::expression::{Identifier, VariableAccess},
+    };
     use pretty_assertions::assert_eq;
 
     #[test]
@@ -31,7 +36,13 @@ mod tests {
 
         assert_eq!(
             parse_gimmeh(keyword, &mut tokens.clone().into()),
-            Ok(Node::Gimmeh(((tokens[0].clone(), false), []).into()))
+            Ok(Node::Gimmeh(VariableAccess {
+                identifier: Identifier {
+                    name: tokens[0].clone(),
+                    srs: None
+                },
+                accesses: VecDeque::new(),
+            }))
         );
     }
 

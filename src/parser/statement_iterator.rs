@@ -1,4 +1,4 @@
-use crate::parser::statements::error_type::ASTErrorType;
+use crate::parser::error::ASTErrorType;
 use crate::{lexer::TokenType, parser::Token};
 use std::collections::VecDeque;
 use std::iter::Peekable;

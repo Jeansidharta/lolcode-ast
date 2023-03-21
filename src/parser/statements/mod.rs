@@ -1,6 +1,5 @@
 use self::assignment::VariableAssignment;
 use self::bukkit_set_slot::BukkitSetSlot;
-pub use self::error_type::ASTErrorType;
 use self::hai::Hai;
 use self::how_is_i::HowIzI;
 use self::i_has_a::IHasA;
@@ -9,11 +8,12 @@ use self::im_in_yr::ImInYr;
 use self::o_rly::ORly;
 use self::visible::Visible;
 use self::wtf::Wtf;
+use crate::parser::error::ASTErrorType;
 
 use crate::parser::expression::parse_expression;
 
 use super::expression::variable_access::{is_valid_variable_access, parse_variable_access};
-use super::expression::ASTExpression;
+use super::expression::{ASTExpression, ASTExpressionValue};
 use crate::lexer::{Keywords, Token, TokenType};
 use crate::parser::expression::VariableAccess;
 use crate::parser::StatementIterator;
@@ -130,8 +130,8 @@ pub(crate) fn parse_statement(
     if is_valid_variable_access(&first_token) {
         let variable_access = parse_variable_access(first_token, tokens)?;
         return match tokens.peek().map(|t| &t.token_type) {
-            None => Ok(Node::Expression(ASTExpression::VariableAccess(
-                variable_access,
+            None => Ok(Node::Expression(ASTExpression::Value(
+                ASTExpressionValue::VariableAccess(variable_access),
             ))),
             Some(TokenType::Keyword(Keywords::R)) => {
                 VariableAssignment::try_from((variable_access, tokens)).map(|t| t.into())

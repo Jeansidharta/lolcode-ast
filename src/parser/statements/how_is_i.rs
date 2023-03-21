@@ -26,11 +26,6 @@ pub enum HowIsIError {
     MissingNameIdentifier(Token),
 }
 
-impl Into<ASTErrorType> for HowIsIError {
-    fn into(self) -> ASTErrorType {
-        ASTErrorType::HowIsIError(self)
-    }
-}
 
 impl TryFrom<(Token, &mut StatementIterator)> for HowIzI {
     type Error = ASTErrorType;
@@ -99,7 +94,10 @@ mod tests {
     use super::*;
     use crate::{
         lexer::{Keywords, TokenType, TokenValue},
-        parser::{expression::ASTExpression, statements::visible::Visible},
+        parser::{
+            expression::{ASTExpression, ASTExpressionValue},
+            statements::visible::Visible,
+        },
     };
     use pretty_assertions::assert_eq;
 
@@ -122,14 +120,17 @@ mod tests {
         assert_eq!(
             HowIzI::try_from((first_token, &mut block_tokens.clone().into())),
             Ok(HowIzI {
-                name: (block_tokens[0][0].clone(), false).into(),
-                arguments: [].into(),
-                body: [Visible(
-                    [ASTExpression::LiteralValue(block_tokens[1][1].clone())].into(),
+                name: Identifier {
+                    name: block_tokens[0][0].clone(),
+                    srs: None
+                },
+                arguments: VecDeque::new(),
+                body: ASTBlock(VecDeque::from([Node::Visible(Visible(
+                    VecDeque::from([ASTExpression::Value(ASTExpressionValue::LiteralValue(
+                        block_tokens[1][1].clone()
+                    ))]),
                     None
-                )
-                .into()]
-                .into()
+                ))]))
             })
         )
     }
@@ -161,19 +162,30 @@ mod tests {
         assert_eq!(
             HowIzI::try_from((first_token, &mut block_tokens.clone().into())),
             Ok(HowIzI {
-                name: (block_tokens[0][0].clone(), false).into(),
-                arguments: [
-                    (block_tokens[0][2].clone(), false).into(),
-                    (block_tokens[0][5].clone(), false).into(),
-                    (block_tokens[0][8].clone(), false).into(),
-                ]
-                .into(),
-                body: [Visible(
-                    [ASTExpression::LiteralValue(block_tokens[1][1].clone())].into(),
+                name: Identifier {
+                    name: block_tokens[0][0].clone(),
+                    srs: None
+                },
+                arguments: VecDeque::from([
+                    Identifier {
+                        name: block_tokens[0][2].clone(),
+                        srs: None
+                    },
+                    Identifier {
+                        name: block_tokens[0][5].clone(),
+                        srs: None
+                    },
+                    Identifier {
+                        name: block_tokens[0][8].clone(),
+                        srs: None
+                    },
+                ]),
+                body: ASTBlock(VecDeque::from([Node::Visible(Visible(
+                    VecDeque::from([ASTExpression::Value(ASTExpressionValue::LiteralValue(
+                        block_tokens[1][1].clone()
+                    ))]),
                     None
-                )
-                .into()]
-                .into()
+                ))]))
             })
         )
     }

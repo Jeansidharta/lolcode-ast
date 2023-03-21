@@ -19,10 +19,12 @@ pub(crate) fn parse_found_yr(
 
 #[cfg(test)]
 mod tests {
+    use std::collections::VecDeque;
+
     use super::*;
     use crate::{
         lexer::{Keywords, TokenType},
-        parser::expression::ASTExpression,
+        parser::expression::{ASTExpression, ASTExpressionValue, Identifier, VariableAccess},
     };
     use pretty_assertions::assert_eq;
 
@@ -33,8 +35,14 @@ mod tests {
 
         assert_eq!(
             parse_found_yr(keyword, &mut StatementIterator::new(vec![ident.clone()])),
-            Ok(Node::FoundYr(ASTExpression::VariableAccess(
-                ((ident.clone(), false), []).into()
+            Ok(Node::FoundYr(ASTExpression::Value(
+                ASTExpressionValue::VariableAccess(VariableAccess {
+                    identifier: Identifier {
+                        name: ident.clone(),
+                        srs: None
+                    },
+                    accesses: VecDeque::new(),
+                })
             )))
         );
     }
