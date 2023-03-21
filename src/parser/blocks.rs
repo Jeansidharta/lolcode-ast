@@ -186,7 +186,7 @@ pub fn parse_block_switch(statement_iterator: &mut StatementIterator) -> ASTBloc
 mod tests {
     use crate::parser::{
         expression::{ASTExpressionValue, BinaryOperation, BinaryOpt, VariableAccess},
-        statements::i_has_a::IHasAInitialValue,
+        statements::{found_yr::FoundYr, i_has_a::IHasAInitialValue},
     };
     use std::collections::VecDeque;
 
@@ -325,15 +325,18 @@ mod tests {
                     })
                 }
                 .into(),
-                Node::FoundYr(ASTExpression::Value(ASTExpressionValue::VariableAccess(
-                    VariableAccess {
-                        identifier: Identifier {
-                            name: block_tokens[2][1].clone(),
-                            srs: None,
-                        },
-                        accesses: VecDeque::new()
-                    }
-                )))
+                Node::FoundYr(FoundYr {
+                    found_yr_token: block_tokens[2][0].clone(),
+                    expression: ASTExpression::Value(ASTExpressionValue::VariableAccess(
+                        VariableAccess {
+                            identifier: Identifier {
+                                name: block_tokens[2][1].clone(),
+                                srs: None,
+                            },
+                            accesses: VecDeque::new()
+                        }
+                    ))
+                })
             ])
         )
     }

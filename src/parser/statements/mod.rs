@@ -96,7 +96,7 @@ pub enum Node {
     BukkitSetSlot(BukkitSetSlot),
     VariableAssignment(VariableAssignment),
     Visible(Visible),
-    FoundYr(ASTExpression),
+    FoundYr(FoundYr),
     Wtf(Wtf),
     ORly(ORly),
     IIz(IIz),
