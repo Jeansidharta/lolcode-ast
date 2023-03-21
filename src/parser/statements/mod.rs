@@ -1,5 +1,7 @@
 use self::assignment::VariableAssignment;
 use self::bukkit_set_slot::BukkitSetSlot;
+use self::found_yr::FoundYr;
+use self::gtfo::Gtfo;
 use self::hai::Hai;
 use self::how_is_i::HowIzI;
 use self::i_has_a::IHasA;
@@ -101,7 +103,7 @@ pub enum Node {
     ORly(ORly),
     IIz(IIz),
     HowIzI(HowIzI),
-    Gtfo(Token),
+    Gtfo(Gtfo),
     Gimmeh(VariableAccess),
     Expression(ASTExpression),
     ASTError(ASTErrorType),
@@ -154,7 +156,7 @@ pub(crate) fn parse_statement(
         TokenType::Keyword(Keywords::FOUND_YR) => found_yr::parse_found_yr(first_token, tokens),
         TokenType::Keyword(Keywords::HAI) => Hai::try_from(tokens).map(|t| t.into()),
         TokenType::Keyword(Keywords::KTHXBYE) => kthxbye::parse_kthxbye(first_token),
-        TokenType::Keyword(Keywords::GTFO) => gtfo::parse_gtfo(first_token),
+        TokenType::Keyword(Keywords::GTFO) => gtfo::parse_gtfo(first_token).into(),
         TokenType::Keyword(Keywords::I_IZ) => {
             IIz::try_from((first_token, tokens)).map(|t| t.into())
         }

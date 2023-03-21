@@ -1,7 +1,10 @@
 use crate::lexer::Token;
-use crate::parser::statements::ASTErrorType;
-use crate::parser::statements::Node;
 
-pub(crate) fn parse_gtfo(token: Token) -> Result<Node, ASTErrorType> {
-    Ok(Node::Gtfo(token))
+#[derive(Debug, PartialEq, Clone)]
+pub struct Gtfo {
+    gtfo_token: Token,
+}
+
+pub(crate) fn parse_gtfo(token: Token) -> Gtfo {
+    Gtfo { gtfo_token: token }
 }
