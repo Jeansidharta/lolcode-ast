@@ -4,7 +4,6 @@ use crate::parser::expression::ASTType;
 use crate::parser::expression::Identifier;
 use crate::parser::expression::{parse_expression, ASTExpression};
 use crate::parser::statements::ASTErrorType;
-use crate::parser::statements::Node;
 use crate::parser::StatementIterator;
 
 /// When defining a variable, it can either be initialized by value, or by type.
@@ -26,18 +25,6 @@ pub enum IHasAError {
     MissingIdentifier(Token),
     /// An `ITZ` token was found, but no expression or type after
     ExpectedInitialValue(Token),
-}
-
-impl From<ASTExpression> for IHasAInitialValue {
-    fn from(value: ASTExpression) -> Self {
-        IHasAInitialValue::Expression(value)
-    }
-}
-
-impl From<ASTType> for IHasAInitialValue {
-    fn from(value: ASTType) -> Self {
-        IHasAInitialValue::Type(value)
-    }
 }
 
 /// The variable definition statement
@@ -116,12 +103,6 @@ impl TryFrom<(Token, &mut StatementIterator)> for IHasA {
             identifier,
             initial_value: Some(initial_value),
         })
-    }
-}
-
-impl Into<Node> for IHasA {
-    fn into(self) -> Node {
-        Node::IHasA(self)
     }
 }
 

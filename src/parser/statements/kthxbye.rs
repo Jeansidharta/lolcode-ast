@@ -1,7 +1,12 @@
 use crate::lexer::Token;
-use crate::parser::statements::ASTErrorType;
-use crate::parser::statements::Node;
 
-pub(crate) fn parse_kthxbye(first_token: Token) -> Result<Node, ASTErrorType> {
-    Ok(Node::KTHXBYE(first_token))
+#[derive(Debug, PartialEq, Clone)]
+pub struct KThxBye {
+    k_thx_bye_token: Token,
+}
+
+pub(crate) fn parse_kthxbye(first_token: Token) -> KThxBye {
+    KThxBye {
+        k_thx_bye_token: first_token,
+    }
 }

@@ -1,6 +1,5 @@
 use crate::parser::expression::variable_access::parse_identifier;
 use crate::parser::statements::ASTErrorType;
-use crate::parser::statements::Node;
 use crate::parser::Identifier;
 use crate::parser::StatementIterator;
 use std::collections::VecDeque;
@@ -25,7 +24,6 @@ pub enum HowIsIError {
     /// A `HOW IZ I` token was found, but no Identifier after
     MissingNameIdentifier(Token),
 }
-
 
 impl TryFrom<(Token, &mut StatementIterator)> for HowIzI {
     type Error = ASTErrorType;
@@ -82,12 +80,6 @@ impl TryFrom<(Token, &mut StatementIterator)> for HowIzI {
     }
 }
 
-impl Into<Node> for HowIzI {
-    fn into(self) -> Node {
-        Node::HowIzI(self)
-    }
-}
-
 #[cfg(test)]
 mod tests {
 
@@ -96,7 +88,7 @@ mod tests {
         lexer::{Keywords, TokenType, TokenValue},
         parser::{
             expression::{ASTExpression, ASTExpressionValue},
-            statements::visible::Visible,
+            statements::{visible::Visible, Node},
         },
     };
     use pretty_assertions::assert_eq;

@@ -3,7 +3,6 @@ use crate::parser::expression::variable_access::parse_identifier;
 use crate::parser::expression::Identifier;
 use crate::parser::expression::{parse_expression, ASTExpression};
 use crate::parser::statements::ASTErrorType;
-use crate::parser::statements::Node;
 use crate::parser::statements::VariableAccess;
 use crate::parser::StatementIterator;
 
@@ -68,12 +67,6 @@ impl TryFrom<(VariableAccess, &mut StatementIterator)> for BukkitSetSlot {
             slot_name,
             value,
         })
-    }
-}
-
-impl Into<Node> for BukkitSetSlot {
-    fn into(self) -> Node {
-        Node::BukkitSetSlot(self)
     }
 }
 

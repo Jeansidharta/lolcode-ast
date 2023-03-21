@@ -1,7 +1,6 @@
 use crate::lexer::{Keywords, Token, TokenType};
 use crate::parser::expression::{parse_expression, ASTExpression};
 use crate::parser::statements::ASTErrorType;
-use crate::parser::statements::Node;
 use crate::parser::statements::VariableAccess;
 use crate::parser::StatementIterator;
 
@@ -63,12 +62,6 @@ impl TryFrom<(VariableAccess, &mut StatementIterator)> for VariableAssignment {
             expression: value,
             r_token,
         })
-    }
-}
-
-impl Into<Node> for VariableAssignment {
-    fn into(self) -> Node {
-        Node::VariableAssignment(self)
     }
 }
 

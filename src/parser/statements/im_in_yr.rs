@@ -5,7 +5,6 @@ use crate::parser::expression::variable_access::parse_variable_access;
 use crate::parser::expression::VariableAccess;
 use crate::parser::statements::ASTErrorType;
 use crate::parser::statements::ASTExpression;
-use crate::parser::statements::Node;
 use crate::parser::ASTBlock;
 use crate::parser::StatementIterator;
 
@@ -269,12 +268,6 @@ impl TryFrom<(Token, &mut StatementIterator)> for ImInYr {
     }
 }
 
-impl Into<Node> for ImInYr {
-    fn into(self) -> Node {
-        Node::ImInYr(self)
-    }
-}
-
 #[cfg(test)]
 mod tests {
 
@@ -285,7 +278,7 @@ mod tests {
         lexer::{Keywords, NumberToken, TokenType, TokenValue},
         parser::{
             expression::{ASTExpressionValue, BinaryOperation, BinaryOpt, Identifier},
-            statements::{assignment::VariableAssignment, visible::Visible},
+            statements::{assignment::VariableAssignment, visible::Visible, Node},
         },
     };
     use pretty_assertions::assert_eq;

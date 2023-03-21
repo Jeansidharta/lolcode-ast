@@ -8,6 +8,7 @@ use self::how_is_i::HowIzI;
 use self::i_has_a::IHasA;
 use self::i_is::IIz;
 use self::im_in_yr::ImInYr;
+use self::kthxbye::KThxBye;
 use self::o_rly::ORly;
 use self::visible::Visible;
 use self::wtf::Wtf;
@@ -94,7 +95,7 @@ pub mod wtf;
 #[derive(Debug, PartialEq, Clone)]
 pub enum Node {
     IHasA(IHasA),
-    HAI(Hai),
+    Hai(Hai),
     ImInYr(ImInYr),
     BukkitSetSlot(BukkitSetSlot),
     VariableAssignment(VariableAssignment),
@@ -108,7 +109,89 @@ pub enum Node {
     Gimmeh(Gimmeh),
     Expression(ASTExpression),
     ASTError(ASTErrorType),
-    KTHXBYE(Token),
+    KThxBye(KThxBye),
+}
+
+impl From<IHasA> for Node {
+    fn from(value: IHasA) -> Node {
+        Node::IHasA(value)
+    }
+}
+impl From<Hai> for Node {
+    fn from(value: Hai) -> Node {
+        Node::Hai(value)
+    }
+}
+impl From<ImInYr> for Node {
+    fn from(value: ImInYr) -> Node {
+        Node::ImInYr(value)
+    }
+}
+impl From<BukkitSetSlot> for Node {
+    fn from(value: BukkitSetSlot) -> Node {
+        Node::BukkitSetSlot(value)
+    }
+}
+impl From<VariableAssignment> for Node {
+    fn from(value: VariableAssignment) -> Node {
+        Node::VariableAssignment(value)
+    }
+}
+impl From<Visible> for Node {
+    fn from(value: Visible) -> Node {
+        Node::Visible(value)
+    }
+}
+impl From<FoundYr> for Node {
+    fn from(value: FoundYr) -> Node {
+        Node::FoundYr(value)
+    }
+}
+impl From<Wtf> for Node {
+    fn from(value: Wtf) -> Node {
+        Node::Wtf(value)
+    }
+}
+impl From<ORly> for Node {
+    fn from(value: ORly) -> Node {
+        Node::ORly(value)
+    }
+}
+impl From<IIz> for Node {
+    fn from(value: IIz) -> Node {
+        Node::IIz(value)
+    }
+}
+impl From<HowIzI> for Node {
+    fn from(value: HowIzI) -> Node {
+        Node::HowIzI(value)
+    }
+}
+impl From<Gtfo> for Node {
+    fn from(value: Gtfo) -> Node {
+        Node::Gtfo(value)
+    }
+}
+impl From<Gimmeh> for Node {
+    fn from(value: Gimmeh) -> Node {
+        Node::Gimmeh(value)
+    }
+}
+
+impl From<ASTExpression> for Node {
+    fn from(value: ASTExpression) -> Node {
+        Node::Expression(value)
+    }
+}
+impl From<ASTErrorType> for Node {
+    fn from(value: ASTErrorType) -> Node {
+        Node::ASTError(value)
+    }
+}
+impl From<KThxBye> for Node {
+    fn from(value: KThxBye) -> Node {
+        Node::KThxBye(value)
+    }
 }
 
 impl<T: Into<Node>> From<Result<T, ASTErrorType>> for Node {
@@ -117,12 +200,6 @@ impl<T: Into<Node>> From<Result<T, ASTErrorType>> for Node {
             Err(err) => Node::ASTError(err),
             Ok(val) => val.into(),
         }
-    }
-}
-
-impl From<ASTErrorType> for Node {
-    fn from(value: ASTErrorType) -> Self {
-        Node::ASTError(value)
     }
 }
 
@@ -160,8 +237,8 @@ pub(crate) fn parse_statement(
             found_yr::parse_found_yr(first_token, tokens).map(|t| t.into())
         }
         TokenType::Keyword(Keywords::HAI) => Hai::try_from(tokens).map(|t| t.into()),
-        TokenType::Keyword(Keywords::KTHXBYE) => kthxbye::parse_kthxbye(first_token),
-        TokenType::Keyword(Keywords::GTFO) => gtfo::parse_gtfo(first_token).into(),
+        TokenType::Keyword(Keywords::KTHXBYE) => Ok(kthxbye::parse_kthxbye(first_token).into()),
+        TokenType::Keyword(Keywords::GTFO) => Ok(gtfo::parse_gtfo(first_token).into()),
         TokenType::Keyword(Keywords::I_IZ) => {
             IIz::try_from((first_token, tokens)).map(|t| t.into())
         }

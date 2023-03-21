@@ -1,5 +1,4 @@
 use crate::parser::statements::ASTErrorType;
-use crate::parser::statements::Node;
 use crate::parser::StatementIterator;
 use std::collections::VecDeque;
 
@@ -22,12 +21,6 @@ impl TryFrom<&mut StatementIterator> for Visible {
         let exclamation_mark = tokens.next_if_token_type_eq(TokenType::ExclamationMark);
 
         Ok(Visible(expressions, exclamation_mark))
-    }
-}
-
-impl Into<Node> for Visible {
-    fn into(self) -> Node {
-        Node::Visible(self)
     }
 }
 

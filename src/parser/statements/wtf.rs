@@ -1,5 +1,4 @@
 use crate::parser::statements::ASTErrorType;
-use crate::parser::statements::Node;
 use crate::parser::StatementIterator;
 use std::collections::VecDeque;
 
@@ -67,12 +66,6 @@ impl TryFrom<(Token, &mut StatementIterator)> for Wtf {
     }
 }
 
-impl Into<Node> for Wtf {
-    fn into(self) -> Node {
-        Node::Wtf(self)
-    }
-}
-
 #[cfg(test)]
 mod tests {
 
@@ -81,7 +74,7 @@ mod tests {
         lexer::{Keywords, TokenType, TokenValue},
         parser::{
             expression::{ASTExpressionValue, Identifier, VariableAccess},
-            statements::visible::Visible,
+            statements::{visible::Visible, Node},
         },
     };
     use pretty_assertions::assert_eq;
@@ -149,7 +142,7 @@ mod tests {
                             VecDeque::from([ASTExpression::Value(
                                 ASTExpressionValue::VariableAccess(VariableAccess {
                                     identifier: Identifier {
-                                        name: block_tokens[4][0].clone(),
+                                        name: block_tokens[4][1].clone(),
                                         srs: None,
                                     },
                                     accesses: VecDeque::new()

@@ -1,6 +1,5 @@
 use crate::parser::expression::variable_access::parse_variable_access;
 use crate::parser::statements::ASTErrorType;
-use crate::parser::statements::Node;
 use crate::parser::statements::VariableAccess;
 use crate::parser::StatementIterator;
 use std::collections::VecDeque;
@@ -80,12 +79,6 @@ impl TryFrom<(Token, &mut StatementIterator)> for IIz {
         }
 
         Ok(IIz { name, arguments })
-    }
-}
-
-impl Into<Node> for IIz {
-    fn into(self) -> Node {
-        Node::IIz(self)
     }
 }
 
