@@ -10,9 +10,11 @@ use crate::parser::expression::{parse_expression, ASTExpression};
 #[derive(Debug, Clone, PartialEq)]
 pub struct Visible(pub VecDeque<ASTExpression>, pub Option<Token>);
 
-impl TryFrom<&mut StatementIterator> for Visible {
-    type Error = ASTErrorType;
-    fn try_from(tokens: &mut StatementIterator) -> Result<Self, Self::Error> {
+impl Visible {
+    pub(crate) fn parse(
+        first_token: Token,
+        tokens: &mut StatementIterator,
+    ) -> Result<Visible, ASTErrorType> {
         let mut expressions: VecDeque<ASTExpression> = VecDeque::new();
         while let Some(token) = tokens.next_if_token_type_ne(TokenType::ExclamationMark) {
             expressions.push_back(parse_expression(token, tokens)?);
@@ -38,13 +40,13 @@ mod tests {
 
     #[test]
     fn success_hello_world() {
-        let (_keyword, tokens) = Token::chain_types(vec![
+        let (keyword, tokens) = Token::chain_types(vec![
             TokenType::Keyword(Keywords::VISIBLE),
             TokenType::Value(TokenValue::String("Hello, World!".to_string())),
         ]);
 
         assert_eq!(
-            Visible::try_from(&mut tokens.clone().into()),
+            Visible::parse(keyword.clone(), &mut tokens.clone().into()),
             Ok(Visible(
                 [ASTExpression::Value(ASTExpressionValue::LiteralValue(
                     tokens[0].clone()
@@ -57,14 +59,14 @@ mod tests {
 
     #[test]
     fn success_hello_world_exclamation_mark() {
-        let (_keyword, tokens) = Token::chain_types(vec![
+        let (keyword, tokens) = Token::chain_types(vec![
             TokenType::Keyword(Keywords::VISIBLE),
             TokenType::Value(TokenValue::String("Hello, World!".to_string())),
             TokenType::ExclamationMark,
         ]);
 
         assert_eq!(
-            Visible::try_from(&mut tokens.clone().into()),
+            Visible::parse(keyword.clone(), &mut tokens.clone().into()),
             Ok(Visible(
                 [ASTExpression::Value(ASTExpressionValue::LiteralValue(
                     tokens[0].clone()
@@ -77,30 +79,30 @@ mod tests {
 
     #[test]
     fn success_empty_expression() {
-        let (_keyword, tokens) = Token::chain_types(vec![TokenType::Keyword(Keywords::VISIBLE)]);
+        let (keyword, tokens) = Token::chain_types(vec![TokenType::Keyword(Keywords::VISIBLE)]);
 
         assert_eq!(
-            Visible::try_from(&mut tokens.clone().into()),
+            Visible::parse(keyword.clone(), &mut tokens.clone().into()),
             Ok(Visible([].into(), None))
         );
     }
 
     #[test]
     fn success_empty_expression_with_exclamation_mark() {
-        let (_keyword, tokens) = Token::chain_types(vec![
+        let (keyword, tokens) = Token::chain_types(vec![
             TokenType::Keyword(Keywords::VISIBLE),
             TokenType::ExclamationMark,
         ]);
 
         assert_eq!(
-            Visible::try_from(&mut tokens.clone().into()),
+            Visible::parse(keyword.clone(), &mut tokens.clone().into()),
             Ok(Visible([].into(), Some(tokens[0].clone())))
         );
     }
 
     #[test]
     fn complex_expressions() {
-        let (_first_token, tokens) = Token::chain_types(vec![
+        let (first_token, tokens) = Token::chain_types(vec![
             TokenType::Keyword(Keywords::VISIBLE),
             TokenType::Keyword(Keywords::SMOOSH),
             TokenType::Value(TokenValue::String("Hello, World!".to_string())),
@@ -118,7 +120,10 @@ mod tests {
         ]);
 
         assert_eq!(
-            Visible::try_from(&mut StatementIterator::new(tokens.clone().into())),
+            Visible::parse(
+                first_token.clone(),
+                &mut StatementIterator::new(tokens.clone().into())
+            ),
             Ok(Visible(
                 VecDeque::from([
                     ASTExpression::NaryOperation(NaryOperation {

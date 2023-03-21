@@ -25,12 +25,11 @@ pub enum HowIsIError {
     MissingNameIdentifier(Token),
 }
 
-impl TryFrom<(Token, &mut StatementIterator)> for HowIzI {
-    type Error = ASTErrorType;
-
-    fn try_from(
-        (first_token, tokens): (Token, &mut StatementIterator),
-    ) -> Result<Self, Self::Error> {
+impl HowIzI {
+    pub(crate) fn parse(
+        first_token: Token,
+        tokens: &mut StatementIterator,
+    ) -> Result<HowIzI, ASTErrorType> {
         let name = match tokens.next() {
             None => return Err(HowIsIError::MissingNameIdentifier(first_token).into()),
             Some(token) => parse_identifier(token, tokens)?,
@@ -110,7 +109,7 @@ mod tests {
         let first_token = block_tokens[0].pop_front().unwrap();
 
         assert_eq!(
-            HowIzI::try_from((first_token, &mut block_tokens.clone().into())),
+            HowIzI::parse(first_token, &mut block_tokens.clone().into()),
             Ok(HowIzI {
                 name: Identifier {
                     name: block_tokens[0][0].clone(),
@@ -152,7 +151,7 @@ mod tests {
         let first_token = block_tokens[0].pop_front().unwrap();
 
         assert_eq!(
-            HowIzI::try_from((first_token, &mut block_tokens.clone().into())),
+            HowIzI::parse(first_token, &mut block_tokens.clone().into()),
             Ok(HowIzI {
                 name: Identifier {
                     name: block_tokens[0][0].clone(),

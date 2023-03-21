@@ -19,12 +19,11 @@ pub struct BukkitSetSlot {
     pub value: ASTExpression,
 }
 
-impl TryFrom<(VariableAccess, &mut StatementIterator)> for BukkitSetSlot {
-    type Error = ASTErrorType;
-
-    fn try_from(
-        (bukkit, tokens): (VariableAccess, &mut StatementIterator),
-    ) -> Result<Self, Self::Error> {
+impl BukkitSetSlot {
+    pub(crate) fn parse(
+        bukkit: VariableAccess,
+        tokens: &mut StatementIterator,
+    ) -> Result<BukkitSetSlot, ASTErrorType> {
         let has_a_token = match tokens.next() {
             Some(
                 token @ Token {
@@ -90,7 +89,7 @@ mod tests {
             TokenType::Value(TokenValue::String("Cebola".to_string())),
         ]);
         assert_eq!(
-            BukkitSetSlot::try_from((
+            BukkitSetSlot::parse(
                 VariableAccess {
                     identifier: Identifier {
                         name: identifier.clone(),
@@ -99,7 +98,7 @@ mod tests {
                     accesses: VecDeque::new(),
                 },
                 &mut StatementIterator::new(operands.clone().into())
-            )),
+            ),
             Ok(BukkitSetSlot {
                 bukkit: VariableAccess {
                     identifier: Identifier {

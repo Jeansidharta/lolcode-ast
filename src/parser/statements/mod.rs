@@ -214,10 +214,10 @@ pub(crate) fn parse_statement(
                 ASTExpressionValue::VariableAccess(variable_access),
             ))),
             Some(TokenType::Keyword(Keywords::R)) => {
-                VariableAssignment::try_from((variable_access, tokens)).map(|t| t.into())
+                VariableAssignment::parse(variable_access, tokens).map(|t| t.into())
             }
             Some(TokenType::Keyword(Keywords::HAS_A)) => {
-                BukkitSetSlot::try_from((variable_access, tokens)).map(|t| t.into())
+                BukkitSetSlot::parse(variable_access, tokens).map(|t| t.into())
             }
 
             // TODO - fix this mess
@@ -227,31 +227,29 @@ pub(crate) fn parse_statement(
 
     match first_token.token_type {
         TokenType::Keyword(Keywords::I_HAS_A) => {
-            IHasA::try_from((first_token, tokens)).map(|t| t.into())
+            IHasA::parse(first_token, tokens).map(|t| t.into())
         }
-        TokenType::Keyword(Keywords::VISIBLE) => Visible::try_from(tokens).map(|t| t.into()),
+        TokenType::Keyword(Keywords::VISIBLE) => {
+            Visible::parse(first_token, tokens).map(|t| t.into())
+        }
         TokenType::Keyword(Keywords::GIMMEH) => {
             gimmeh::parse_gimmeh(first_token, tokens).map(|t| t.into())
         }
         TokenType::Keyword(Keywords::FOUND_YR) => {
             found_yr::parse_found_yr(first_token, tokens).map(|t| t.into())
         }
-        TokenType::Keyword(Keywords::HAI) => Hai::try_from(tokens).map(|t| t.into()),
+        TokenType::Keyword(Keywords::HAI) => Hai::parse(first_token, tokens).map(|t| t.into()),
         TokenType::Keyword(Keywords::KTHXBYE) => Ok(kthxbye::parse_kthxbye(first_token).into()),
         TokenType::Keyword(Keywords::GTFO) => Ok(gtfo::parse_gtfo(first_token).into()),
-        TokenType::Keyword(Keywords::I_IZ) => {
-            IIz::try_from((first_token, tokens)).map(|t| t.into())
-        }
+        TokenType::Keyword(Keywords::I_IZ) => IIz::parse(first_token, tokens).map(|t| t.into()),
         TokenType::Keyword(Keywords::IM_IN_YR) => {
-            ImInYr::try_from((first_token, tokens)).map(|t| t.into())
+            ImInYr::parse(first_token, tokens).map(|t| t.into())
         }
         TokenType::Keyword(Keywords::HOW_IZ_I) => {
-            HowIzI::try_from((first_token, tokens)).map(|t| t.into())
+            HowIzI::parse(first_token, tokens).map(|t| t.into())
         }
-        TokenType::Keyword(Keywords::WTF) => Wtf::try_from((first_token, tokens)).map(|t| t.into()),
-        TokenType::Keyword(Keywords::O_RLY) => {
-            ORly::try_from((first_token, tokens)).map(|t| t.into())
-        }
+        TokenType::Keyword(Keywords::WTF) => Wtf::parse(first_token, tokens).map(|t| t.into()),
+        TokenType::Keyword(Keywords::O_RLY) => ORly::parse(first_token, tokens).map(|t| t.into()),
         // Try to parse it as an expression
         _ => parse_expression(first_token, tokens).map(|e| Node::Expression(e)),
     }

@@ -34,12 +34,11 @@ pub enum VariableAssignmentError {
     ExpectedValue(Token),
 }
 
-impl TryFrom<(VariableAccess, &mut StatementIterator)> for VariableAssignment {
-    type Error = ASTErrorType;
-
-    fn try_from(
-        (identifier, tokens): (VariableAccess, &mut StatementIterator),
-    ) -> Result<Self, Self::Error> {
+impl VariableAssignment {
+    pub(crate) fn parse(
+        identifier: VariableAccess,
+        tokens: &mut StatementIterator,
+    ) -> Result<VariableAssignment, ASTErrorType> {
         let r_token = match tokens.next() {
             Some(
                 token @ Token {
@@ -85,7 +84,7 @@ mod tests {
             TokenType::Value(TokenValue::NOOB),
         ]);
         assert_eq!(
-            VariableAssignment::try_from((
+            VariableAssignment::parse(
                 VariableAccess {
                     identifier: Identifier {
                         name: identifier.clone(),
@@ -94,7 +93,7 @@ mod tests {
                     accesses: VecDeque::new()
                 },
                 &mut StatementIterator::new(operands.clone().into())
-            )),
+            ),
             Ok(VariableAssignment {
                 variable_access: VariableAccess {
                     identifier: Identifier {
@@ -118,7 +117,7 @@ mod tests {
             TokenType::Value(TokenValue::NOOB),
         ]);
         assert_eq!(
-            VariableAssignment::try_from((
+            VariableAssignment::parse(
                 VariableAccess {
                     identifier: Identifier {
                         name: identifier.clone(),
@@ -127,7 +126,7 @@ mod tests {
                     accesses: VecDeque::new()
                 },
                 &mut StatementIterator::new(operands.clone().into())
-            )),
+            ),
             Err(VariableAssignmentError::MissingR(identifier).into())
         );
     }

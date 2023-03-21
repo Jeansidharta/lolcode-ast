@@ -29,12 +29,11 @@ pub enum ORlyError {
     MissingMebbeExpression(Token),
 }
 
-impl TryFrom<(Token, &mut StatementIterator)> for ORly {
-    type Error = ASTErrorType;
-
-    fn try_from(
-        (first_token, tokens): (Token, &mut StatementIterator),
-    ) -> Result<Self, Self::Error> {
+impl ORly {
+    pub(crate) fn parse(
+        first_token: Token,
+        tokens: &mut StatementIterator,
+    ) -> Result<ORly, ASTErrorType> {
         match tokens.next().map(|t| t.token_type) {
             Some(TokenType::Symbol(symbol)) if symbol == "?" => {}
             _ => return Err(ORlyError::MissingQuestionMark(first_token).into()),
@@ -136,7 +135,7 @@ mod tests {
         let first_token = block_tokens[0].pop_front().unwrap();
 
         assert_eq!(
-            ORly::try_from((first_token, &mut block_tokens.clone().into())),
+            ORly::parse(first_token, &mut block_tokens.clone().into()),
             Ok(ORly {
                 if_true: Some(
                     [Visible(
@@ -204,7 +203,7 @@ mod tests {
         let first_token = block_tokens[0].pop_front().unwrap();
 
         assert_eq!(
-            ORly::try_from((first_token, &mut block_tokens.clone().into())),
+            ORly::parse(first_token, &mut block_tokens.clone().into()),
             Ok(ORly {
                 if_true: None,
                 mebbes: VecDeque::new(),
@@ -234,7 +233,7 @@ mod tests {
         let first_token = block_tokens[0].pop_front().unwrap();
 
         assert_eq!(
-            ORly::try_from((first_token.clone(), &mut block_tokens.clone().into())),
+            ORly::parse(first_token.clone(), &mut block_tokens.clone().into()),
             Err(ORlyError::MissingQuestionMark(first_token.clone()).into())
         )
     }

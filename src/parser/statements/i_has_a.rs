@@ -37,12 +37,11 @@ pub struct IHasA {
     pub initial_value: Option<IHasAInitialValue>,
 }
 
-impl TryFrom<(Token, &mut StatementIterator)> for IHasA {
-    type Error = ASTErrorType;
-
-    fn try_from(
-        (first_token, tokens): (Token, &mut StatementIterator),
-    ) -> Result<Self, Self::Error> {
+impl IHasA {
+    pub fn parse(
+        first_token: Token,
+        tokens: &mut StatementIterator,
+    ) -> Result<IHasA, ASTErrorType> {
         let identifier = match tokens.next() {
             None => {
                 return Err(IHasAError::MissingIdentifier(first_token).into());
@@ -116,7 +115,7 @@ mod tests {
     fn missing_identifier() {
         let (keyword, tokens) = Token::chain_types(vec![TokenType::Keyword(Keywords::I_HAS_A)]);
         assert_eq!(
-            IHasA::try_from((keyword.clone(), &mut tokens.clone().into())),
+            IHasA::parse(keyword.clone(), &mut tokens.clone().into()),
             Err(IHasAError::MissingIdentifier(keyword).into())
         );
     }
@@ -129,7 +128,7 @@ mod tests {
         ]);
 
         assert_eq!(
-            IHasA::try_from((keyword.clone(), &mut tokens.clone().into())),
+            IHasA::parse(keyword.clone(), &mut tokens.clone().into()),
             Err(IHasAError::InvalidIdentifier(tokens[0].clone()).into())
         );
     }
@@ -142,7 +141,7 @@ mod tests {
         ]);
 
         assert_eq!(
-            IHasA::try_from((keyword.clone(), &mut tokens.clone().into())),
+            IHasA::parse(keyword.clone(), &mut tokens.clone().into()),
             Err(IHasAError::InvalidIdentifier(tokens[0].clone()).into())
         );
     }
@@ -155,7 +154,7 @@ mod tests {
         ]);
 
         assert_eq!(
-            IHasA::try_from((keyword, &mut tokens.clone().into())),
+            IHasA::parse(keyword, &mut tokens.clone().into()),
             Err(IHasAError::InvalidIdentifier(tokens[0].clone()).into())
         );
     }
@@ -169,7 +168,7 @@ mod tests {
         ]);
 
         assert_eq!(
-            IHasA::try_from((keyword, &mut tokens.clone().into())),
+            IHasA::parse(keyword, &mut tokens.clone().into()),
             Err(ASTErrorType::UnexpectedToken(tokens[1].clone()))
         );
     }
@@ -183,7 +182,7 @@ mod tests {
         ]);
 
         assert_eq!(
-            IHasA::try_from((keyword, &mut tokens.clone().into())),
+            IHasA::parse(keyword, &mut tokens.clone().into()),
             Err(IHasAError::ExpectedInitialValue(tokens[1].clone()).into())
         );
     }
@@ -198,7 +197,7 @@ mod tests {
         ]);
 
         assert_eq!(
-            IHasA::try_from((keyword, &mut tokens.clone().into())),
+            IHasA::parse(keyword, &mut tokens.clone().into()),
             Err(ASTErrorType::UnexpectedToken(tokens[2].clone()))
         );
     }
@@ -213,7 +212,7 @@ mod tests {
         ]);
 
         assert_eq!(
-            IHasA::try_from((first_token.clone(), &mut tokens.clone().into())),
+            IHasA::parse(first_token.clone(), &mut tokens.clone().into()),
             Ok(IHasA {
                 i_has_a_token: first_token.clone(),
                 identifier: Identifier {
@@ -237,7 +236,7 @@ mod tests {
         ]);
 
         assert_eq!(
-            IHasA::try_from((first_token.clone(), &mut tokens.clone().into())),
+            IHasA::parse(first_token.clone(), &mut tokens.clone().into()),
             Ok(IHasA {
                 i_has_a_token: first_token.clone(),
                 identifier: Identifier {

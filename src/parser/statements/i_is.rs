@@ -38,12 +38,11 @@ pub enum IIzError {
     MissingMkay(Token),
 }
 
-impl TryFrom<(Token, &mut StatementIterator)> for IIz {
-    type Error = ASTErrorType;
-
-    fn try_from(
-        (first_token, tokens): (Token, &mut StatementIterator),
-    ) -> Result<Self, Self::Error> {
+impl IIz {
+    pub(crate) fn parse(
+        first_token: Token,
+        tokens: &mut StatementIterator,
+    ) -> Result<IIz, ASTErrorType> {
         let name = match tokens.next() {
             None => return Err(ASTErrorType::IIz(IIzError::MissingName(first_token))),
             Some(token) => parse_variable_access(token, tokens)?,
@@ -103,7 +102,7 @@ mod tests {
         let first_token = block_tokens[0].pop_front().unwrap();
 
         assert_eq!(
-            IIz::try_from((first_token, &mut block_tokens.clone().into())),
+            IIz::parse(first_token, &mut block_tokens.clone().into()),
             Ok(IIz {
                 name: VariableAccess {
                     identifier: Identifier {
@@ -139,7 +138,7 @@ mod tests {
         let first_token = block_tokens[0].pop_front().unwrap();
 
         assert_eq!(
-            IIz::try_from((first_token, &mut block_tokens.clone().into())),
+            IIz::parse(first_token, &mut block_tokens.clone().into()),
             Ok(IIz {
                 name: VariableAccess {
                     identifier: Identifier {

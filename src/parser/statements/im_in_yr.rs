@@ -139,6 +139,55 @@ pub struct ImInYr {
     pub end_label: Token,
 }
 
+impl ImInYr {
+    pub(crate) fn parse(
+        first_token: Token,
+        mut tokens: &mut StatementIterator,
+    ) -> Result<ImInYr, ASTErrorType> {
+        let label = match tokens.next() {
+            Some(
+                token @ Token {
+                    token_type: TokenType::Identifier(_),
+                    ..
+                },
+            ) => token,
+            None => return Err(ImInYrError::MissingStartLabel(first_token).into()),
+            Some(token) => return Err(ImInYrError::InvalidStartLabel(token).into()),
+        };
+
+        let on_iteration = parse_iteration_operation(&mut tokens)?;
+        let condition = parse_conditional(&mut tokens)?;
+
+        tokens.next_statement_should_be_empty()?;
+
+        let code_block = parse_block_loop(tokens);
+
+        let im_outta_yr = match tokens.next() {
+            Some(token) => token,
+            None => return Err(ImInYrError::MissingImOuttaYr(first_token).into()),
+        };
+
+        let end_label = match tokens.next() {
+            None => return Err(ImInYrError::MissingEndLabel(im_outta_yr).into()),
+            Some(
+                token @ Token {
+                    token_type: TokenType::Identifier(_),
+                    ..
+                },
+            ) => token,
+            Some(token) => return Err(ImInYrError::InvalidEndLabel(token).into()),
+        };
+
+        Ok(ImInYr {
+            label,
+            on_iteration,
+            code_block,
+            end_label,
+            condition,
+        })
+    }
+}
+
 fn parse_conditional(
     tokens: &mut &mut StatementIterator,
 ) -> Result<Option<LoopCondition>, ASTErrorType> {
@@ -218,56 +267,6 @@ fn parse_iteration_operation(
     Ok(Some(LoopIterationOperation { operation, operand }))
 }
 
-impl TryFrom<(Token, &mut StatementIterator)> for ImInYr {
-    type Error = ASTErrorType;
-
-    fn try_from(
-        (first_token, mut tokens): (Token, &mut StatementIterator),
-    ) -> Result<Self, Self::Error> {
-        let label = match tokens.next() {
-            Some(
-                token @ Token {
-                    token_type: TokenType::Identifier(_),
-                    ..
-                },
-            ) => token,
-            None => return Err(ImInYrError::MissingStartLabel(first_token).into()),
-            Some(token) => return Err(ImInYrError::InvalidStartLabel(token).into()),
-        };
-
-        let on_iteration = parse_iteration_operation(&mut tokens)?;
-        let condition = parse_conditional(&mut tokens)?;
-
-        tokens.next_statement_should_be_empty()?;
-
-        let code_block = parse_block_loop(tokens);
-
-        let im_outta_yr = match tokens.next() {
-            Some(token) => token,
-            None => return Err(ImInYrError::MissingImOuttaYr(first_token).into()),
-        };
-
-        let end_label = match tokens.next() {
-            None => return Err(ImInYrError::MissingEndLabel(im_outta_yr).into()),
-            Some(
-                token @ Token {
-                    token_type: TokenType::Identifier(_),
-                    ..
-                },
-            ) => token,
-            Some(token) => return Err(ImInYrError::InvalidEndLabel(token).into()),
-        };
-
-        Ok(ImInYr {
-            label,
-            on_iteration,
-            code_block,
-            end_label,
-            condition,
-        })
-    }
-}
-
 #[cfg(test)]
 mod tests {
 
@@ -312,7 +311,7 @@ mod tests {
         let first_token = block_tokens[0].pop_front().unwrap();
 
         assert_eq!(
-            ImInYr::try_from((first_token, &mut block_tokens.clone().into())),
+            ImInYr::parse(first_token, &mut block_tokens.clone().into()),
             Ok(ImInYr {
                 label: block_tokens[0][0].clone(),
                 on_iteration: None,
@@ -400,7 +399,7 @@ mod tests {
         let first_token = block_tokens[0].pop_front().unwrap();
 
         assert_eq!(
-            ImInYr::try_from((first_token, &mut block_tokens.clone().into())),
+            ImInYr::parse(first_token, &mut block_tokens.clone().into()),
             Ok(ImInYr {
                 label: block_tokens[0][0].clone(),
                 condition: None,
@@ -505,7 +504,7 @@ mod tests {
         let first_token = block_tokens[0].pop_front().unwrap();
 
         assert_eq!(
-            ImInYr::try_from((first_token, &mut block_tokens.clone().into())),
+            ImInYr::parse(first_token, &mut block_tokens.clone().into()),
             Ok(ImInYr {
                 label: block_tokens[0][0].clone(),
                 condition: Some(LoopCondition::TIL(ASTExpression::BinaryOperation(
