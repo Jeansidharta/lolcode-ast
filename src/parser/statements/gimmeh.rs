@@ -1,17 +1,24 @@
 use crate::lexer::Token;
 use crate::parser::expression::variable_access::parse_variable_access;
+use crate::parser::expression::VariableAccess;
 use crate::parser::statements::ASTErrorType;
-use crate::parser::statements::Node;
 use crate::parser::StatementIterator;
+
+#[derive(Debug, PartialEq, Clone)]
+pub struct Gimmeh {
+    gimmeh_token: Token,
+    variable_access: VariableAccess,
+}
 
 pub(crate) fn parse_gimmeh(
     first_token: Token,
     tokens: &mut StatementIterator,
-) -> Result<Node, ASTErrorType> {
+) -> Result<Gimmeh, ASTErrorType> {
     match tokens.next() {
-        Some(token) => {
-            parse_variable_access(token, tokens).and_then(|ident| Ok(Node::Gimmeh(ident)))
-        }
+        Some(token) => Ok(Gimmeh {
+            variable_access: parse_variable_access(token, tokens)?,
+            gimmeh_token: first_token,
+        }),
         None => Err(ASTErrorType::MissingToken(first_token)),
     }
 }
@@ -35,14 +42,17 @@ mod tests {
         ]);
 
         assert_eq!(
-            parse_gimmeh(keyword, &mut tokens.clone().into()),
-            Ok(Node::Gimmeh(VariableAccess {
-                identifier: Identifier {
-                    name: tokens[0].clone(),
-                    srs: None
-                },
-                accesses: VecDeque::new(),
-            }))
+            parse_gimmeh(keyword.clone(), &mut tokens.clone().into()),
+            Ok(Gimmeh {
+                gimmeh_token: keyword.clone(),
+                variable_access: VariableAccess {
+                    identifier: Identifier {
+                        name: tokens[0].clone(),
+                        srs: None
+                    },
+                    accesses: VecDeque::new(),
+                }
+            })
         );
     }
 

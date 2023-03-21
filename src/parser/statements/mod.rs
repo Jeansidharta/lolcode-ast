@@ -1,6 +1,7 @@
 use self::assignment::VariableAssignment;
 use self::bukkit_set_slot::BukkitSetSlot;
 use self::found_yr::FoundYr;
+use self::gimmeh::Gimmeh;
 use self::gtfo::Gtfo;
 use self::hai::Hai;
 use self::how_is_i::HowIzI;
@@ -104,7 +105,7 @@ pub enum Node {
     IIz(IIz),
     HowIzI(HowIzI),
     Gtfo(Gtfo),
-    Gimmeh(VariableAccess),
+    Gimmeh(Gimmeh),
     Expression(ASTExpression),
     ASTError(ASTErrorType),
     KTHXBYE(Token),
@@ -152,8 +153,12 @@ pub(crate) fn parse_statement(
             IHasA::try_from((first_token, tokens)).map(|t| t.into())
         }
         TokenType::Keyword(Keywords::VISIBLE) => Visible::try_from(tokens).map(|t| t.into()),
-        TokenType::Keyword(Keywords::GIMMEH) => gimmeh::parse_gimmeh(first_token, tokens),
-        TokenType::Keyword(Keywords::FOUND_YR) => found_yr::parse_found_yr(first_token, tokens),
+        TokenType::Keyword(Keywords::GIMMEH) => {
+            gimmeh::parse_gimmeh(first_token, tokens).map(|t| t.into())
+        }
+        TokenType::Keyword(Keywords::FOUND_YR) => {
+            found_yr::parse_found_yr(first_token, tokens).map(|t| t.into())
+        }
         TokenType::Keyword(Keywords::HAI) => Hai::try_from(tokens).map(|t| t.into()),
         TokenType::Keyword(Keywords::KTHXBYE) => kthxbye::parse_kthxbye(first_token),
         TokenType::Keyword(Keywords::GTFO) => gtfo::parse_gtfo(first_token).into(),
