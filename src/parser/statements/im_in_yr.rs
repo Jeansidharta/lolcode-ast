@@ -127,6 +127,7 @@ pub struct LoopIterationOperation {
 /// IM OUTTA YR loop
 #[derive(Debug, Clone, PartialEq)]
 pub struct ImInYr {
+    pub(crate) im_in_yr_token: Token,
     /// The label provided. Can be any identifier token
     pub label: Token,
     /// The operation that will run on every iteration
@@ -179,6 +180,7 @@ impl ImInYr {
         };
 
         Ok(ImInYr {
+            im_in_yr_token: first_token,
             label,
             on_iteration,
             code_block,
@@ -311,14 +313,16 @@ mod tests {
         let first_token = block_tokens[0].pop_front().unwrap();
 
         assert_eq!(
-            ImInYr::parse(first_token, &mut block_tokens.clone().into()),
+            ImInYr::parse(first_token.clone(), &mut block_tokens.clone().into()),
             Ok(ImInYr {
+                im_in_yr_token: first_token.clone(),
                 label: block_tokens[0][0].clone(),
                 on_iteration: None,
                 condition: None,
                 code_block: [
-                    Node::Visible(Visible(
-                        VecDeque::from([
+                    Node::Visible(Visible {
+                        visible_token: block_tokens[1][0].clone(),
+                        expressions: VecDeque::from([
                             ASTExpression::Value(ASTExpressionValue::LiteralValue(
                                 block_tokens[1][1].clone()
                             )),
@@ -332,8 +336,8 @@ mod tests {
                                 }
                             ))
                         ]),
-                        None
-                    )),
+                        exclamation_mark: None
+                    }),
                     Node::VariableAssignment(VariableAssignment {
                         variable_access: VariableAccess {
                             identifier: Identifier {
@@ -399,8 +403,9 @@ mod tests {
         let first_token = block_tokens[0].pop_front().unwrap();
 
         assert_eq!(
-            ImInYr::parse(first_token, &mut block_tokens.clone().into()),
+            ImInYr::parse(first_token.clone(), &mut block_tokens.clone().into()),
             Ok(ImInYr {
+                im_in_yr_token: first_token.clone(),
                 label: block_tokens[0][0].clone(),
                 condition: None,
                 on_iteration: Some(LoopIterationOperation {
@@ -414,8 +419,9 @@ mod tests {
                     }
                 }),
                 code_block: [
-                    Visible(
-                        [
+                    Visible {
+                        visible_token: block_tokens[1][0].clone(),
+                        expressions: VecDeque::from([
                             ASTExpression::Value(ASTExpressionValue::LiteralValue(
                                 block_tokens[1][1].clone()
                             )),
@@ -428,10 +434,9 @@ mod tests {
                                     accesses: VecDeque::new()
                                 }
                             ))
-                        ]
-                        .into(),
-                        None
-                    )
+                        ]),
+                        exclamation_mark: None
+                    }
                     .into(),
                     VariableAssignment {
                         variable_access: VariableAccess {
@@ -504,8 +509,9 @@ mod tests {
         let first_token = block_tokens[0].pop_front().unwrap();
 
         assert_eq!(
-            ImInYr::parse(first_token, &mut block_tokens.clone().into()),
+            ImInYr::parse(first_token.clone(), &mut block_tokens.clone().into()),
             Ok(ImInYr {
+                im_in_yr_token: first_token.clone(),
                 label: block_tokens[0][0].clone(),
                 condition: Some(LoopCondition::TIL(ASTExpression::BinaryOperation(
                     BinaryOperation {
@@ -536,8 +542,9 @@ mod tests {
                     }
                 }),
                 code_block: [
-                    Visible(
-                        VecDeque::from([
+                    Visible {
+                        visible_token: block_tokens[1][0].clone(),
+                        expressions: VecDeque::from([
                             ASTExpression::Value(ASTExpressionValue::LiteralValue(
                                 block_tokens[1][1].clone()
                             )),
@@ -551,8 +558,8 @@ mod tests {
                                 }
                             ))
                         ]),
-                        None
-                    )
+                        exclamation_mark: None
+                    }
                     .into(),
                     VariableAssignment {
                         variable_access: VariableAccess {

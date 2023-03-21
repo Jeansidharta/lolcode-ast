@@ -7,17 +7,37 @@ use std::collections::VecDeque;
 use crate::lexer::{Keywords, Token, TokenType};
 use crate::parser::blocks::{parse_block_if, ASTBlock};
 
+#[derive(Clone, PartialEq, Debug)]
+pub struct YaRly {
+    pub(crate) ya_rly_token: Token,
+    pub(crate) block: ASTBlock,
+}
+
+#[derive(Clone, PartialEq, Debug)]
+pub struct NoWai {
+    pub(crate) no_wai_token: Token,
+    pub(crate) block: ASTBlock,
+}
+
+#[derive(Clone, PartialEq, Debug)]
+pub struct Mebbe {
+    pub(crate) mebbe_token: Token,
+    pub(crate) condition: ASTExpression,
+    pub(crate) block: ASTBlock,
+}
+
 /// The `O RLY` statement
 #[derive(Clone, PartialEq, Debug)]
 pub struct ORly {
+    o_rly_token: Token,
     /// The statements that must be executed if the given expression is true.
-    pub if_true: Option<ASTBlock>,
+    pub if_true: Option<YaRly>,
     /// The statements that must be executed if the given expression is false, and no mebbes were
     /// truthful
-    pub if_false: Option<ASTBlock>,
+    pub if_false: Option<NoWai>,
     /// The statements that must be executed if the given expression false, but the mebbe
     /// expression is true
-    pub mebbes: VecDeque<(ASTExpression, ASTBlock)>,
+    pub mebbes: VecDeque<Mebbe>,
 }
 
 /// Errors that can only happen when parsing a `O RLY?` statement
@@ -40,12 +60,14 @@ impl ORly {
         };
         tokens.next_statement_should_be_empty()?;
 
-        let if_true = if tokens
-            .next_if(|token| matches!(token.token_type, TokenType::Keyword(Keywords::YA_RLY)))
-            .is_some()
+        let if_true = if let Some(ya_rly_token) =
+            tokens.next_if(|token| matches!(token.token_type, TokenType::Keyword(Keywords::YA_RLY)))
         {
             tokens.next_statement_should_be_empty()?;
-            Some(parse_block_if(tokens))
+            Some(YaRly {
+                ya_rly_token,
+                block: parse_block_if(tokens),
+            })
         } else {
             None
         };
@@ -58,17 +80,23 @@ impl ORly {
                 None => return Err(ORlyError::MissingMebbeExpression(mebbe_token).into()),
                 Some(token) => token,
             };
-            let mebbe_expression = parse_expression(first_expression_token, tokens)?;
+            let condition = parse_expression(first_expression_token, tokens)?;
             tokens.next_statement_should_be_empty()?;
-            mebbes.push_back((mebbe_expression, parse_block_if(tokens)));
+            mebbes.push_back(Mebbe {
+                mebbe_token,
+                condition,
+                block: parse_block_if(tokens),
+            });
         }
 
-        let if_false = if tokens
-            .next_if(|token| matches!(token.token_type, TokenType::Keyword(Keywords::NO_WAI)))
-            .is_some()
+        let if_false = if let Some(no_wai_token) =
+            tokens.next_if(|token| matches!(token.token_type, TokenType::Keyword(Keywords::NO_WAI)))
         {
             tokens.next_statement_should_be_empty()?;
-            Some(parse_block_if(tokens))
+            Some(NoWai {
+                no_wai_token,
+                block: parse_block_if(tokens),
+            })
         } else {
             None
         };
@@ -83,6 +111,7 @@ impl ORly {
         }
 
         Ok(ORly {
+            o_rly_token: first_token,
             if_true,
             if_false,
             mebbes,
@@ -135,51 +164,48 @@ mod tests {
         let first_token = block_tokens[0].pop_front().unwrap();
 
         assert_eq!(
-            ORly::parse(first_token, &mut block_tokens.clone().into()),
+            ORly::parse(first_token.clone(), &mut block_tokens.clone().into()),
             Ok(ORly {
-                if_true: Some(
-                    [Visible(
-                        [ASTExpression::Value(ASTExpressionValue::VariableAccess(
-                            VariableAccess {
+                o_rly_token: first_token.clone(),
+                if_true: Some(YaRly {
+                    ya_rly_token: block_tokens[1][0].clone(),
+                    block: ASTBlock(VecDeque::from([Node::Visible(Visible {
+                        visible_token: block_tokens[2][0].clone(),
+                        expressions: VecDeque::from([ASTExpression::Value(
+                            ASTExpressionValue::VariableAccess(VariableAccess {
                                 identifier: Identifier {
                                     name: block_tokens[2][1].clone(),
                                     srs: None,
                                 },
                                 accesses: VecDeque::new(),
-                            }
-                        ))]
-                        .into(),
-                        None
-                    )
-                    .into()]
-                    .into()
-                ),
-                mebbes: [(
-                    ASTExpression::Value(ASTExpressionValue::LiteralValue(
+                            })
+                        )]),
+                        exclamation_mark: None
+                    })]))
+                }),
+                mebbes: VecDeque::from([Mebbe {
+                    mebbe_token: block_tokens[3][0].clone(),
+                    condition: ASTExpression::Value(ASTExpressionValue::LiteralValue(
                         block_tokens[3][1].clone()
                     )),
-                    [Visible(
-                        [ASTExpression::Value(ASTExpressionValue::LiteralValue(
-                            block_tokens[4][1].clone()
-                        ))]
-                        .into(),
-                        None
-                    )
-                    .into()]
-                    .into()
-                )]
-                .into(),
-                if_false: Some(
-                    [Visible(
-                        [ASTExpression::Value(ASTExpressionValue::LiteralValue(
-                            block_tokens[5][3].clone()
-                        ))]
-                        .into(),
-                        None
-                    )
-                    .into()]
-                    .into()
-                ),
+                    block: ASTBlock(VecDeque::from([Node::Visible(Visible {
+                        visible_token: block_tokens[4][0].clone(),
+                        expressions: VecDeque::from([ASTExpression::Value(
+                            ASTExpressionValue::LiteralValue(block_tokens[4][1].clone())
+                        )]),
+                        exclamation_mark: None
+                    })]))
+                }]),
+                if_false: Some(NoWai {
+                    no_wai_token: block_tokens[5][0].clone(),
+                    block: ASTBlock(VecDeque::from([Node::Visible(Visible {
+                        visible_token: block_tokens[5][2].clone(),
+                        expressions: VecDeque::from([ASTExpression::Value(
+                            ASTExpressionValue::LiteralValue(block_tokens[5][3].clone())
+                        )]),
+                        exclamation_mark: None
+                    })]))
+                }),
             })
         )
     }
@@ -203,16 +229,21 @@ mod tests {
         let first_token = block_tokens[0].pop_front().unwrap();
 
         assert_eq!(
-            ORly::parse(first_token, &mut block_tokens.clone().into()),
+            ORly::parse(first_token.clone(), &mut block_tokens.clone().into()),
             Ok(ORly {
+                o_rly_token: first_token.clone(),
                 if_true: None,
                 mebbes: VecDeque::new(),
-                if_false: Some(ASTBlock(VecDeque::from([Node::Visible(Visible(
-                    VecDeque::from([ASTExpression::Value(ASTExpressionValue::LiteralValue(
-                        block_tokens[1][3].clone()
-                    ))]),
-                    None
-                ))]))),
+                if_false: Some(NoWai {
+                    no_wai_token: block_tokens[1][0].clone(),
+                    block: ASTBlock(VecDeque::from([Node::Visible(Visible {
+                        visible_token: block_tokens[1][2].clone(),
+                        expressions: VecDeque::from([ASTExpression::Value(
+                            ASTExpressionValue::LiteralValue(block_tokens[1][3].clone())
+                        )]),
+                        exclamation_mark: None
+                    })]))
+                }),
             })
         )
     }

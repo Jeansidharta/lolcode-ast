@@ -9,8 +9,8 @@ use crate::lexer::{Keywords, Token, TokenType};
 use super::parse_statement;
 use super::statements::how_is_i::HowIzI;
 use super::statements::im_in_yr::ImInYr;
-use super::statements::o_rly::ORly;
-use super::statements::wtf::Wtf;
+use super::statements::o_rly::{Mebbe, NoWai, ORly, YaRly};
+use super::statements::wtf::{Wtf, WtfOmg, WtfOmgWtf};
 
 /// A block of code, which is an array of statements
 #[derive(Debug, PartialEq, Clone)]
@@ -47,20 +47,26 @@ impl<'a> ASTBlockErrorIterator<'a> {
 impl Node {
     pub fn get_inner_block(&self) -> Option<Vec<&ASTBlock>> {
         match self {
-            Node::Wtf(Wtf { omg, omg_wtf }) => {
-                let mut vec: Vec<&ASTBlock> = omg.iter().map(|(_, block)| block).collect();
-                omg_wtf.as_ref().map(|block| vec.push(block));
+            Node::Wtf(Wtf { omg, omg_wtf, .. }) => {
+                let mut vec: Vec<&ASTBlock> =
+                    omg.iter().map(|WtfOmg { block, .. }| block).collect();
+                omg_wtf
+                    .as_ref()
+                    .map(|WtfOmgWtf { block, .. }| vec.push(block));
                 Some(vec)
             }
             Node::ORly(ORly {
                 if_true,
                 if_false,
                 mebbes,
+                ..
             }) => {
                 let mut vec: Vec<&ASTBlock> = vec![];
-                if_true.as_ref().map(|block| vec.push(block));
-                mebbes.iter().for_each(|(_, block)| vec.push(block));
-                if_false.as_ref().map(|block| vec.push(block));
+                if_true.as_ref().map(|YaRly { block, .. }| vec.push(block));
+                mebbes
+                    .iter()
+                    .for_each(|Mebbe { block, .. }| vec.push(block));
+                if_false.as_ref().map(|NoWai { block, .. }| vec.push(block));
                 Some(vec)
             }
             Node::ImInYr(ImInYr { code_block, .. }) => Some(vec![code_block]),
@@ -236,12 +242,13 @@ mod tests {
                     )))
                 }
                 .into(),
-                Visible(
-                    VecDeque::from([ASTExpression::Value(ASTExpressionValue::LiteralValue(
-                        block_tokens[1][1].clone()
-                    ))]),
-                    None
-                )
+                Visible {
+                    visible_token: block_tokens[1][0].clone(),
+                    expressions: VecDeque::from([ASTExpression::Value(
+                        ASTExpressionValue::LiteralValue(block_tokens[1][1].clone())
+                    )]),
+                    exclamation_mark: None
+                }
                 .into(),
                 VariableAssignment {
                     variable_access: VariableAccess {

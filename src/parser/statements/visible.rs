@@ -8,7 +8,13 @@ use crate::parser::expression::{parse_expression, ASTExpression};
 /// The `VISIBLE` statement. It can accept multiple statements, and an optional "!" at the end to
 /// prevent a newline from being printed
 #[derive(Debug, Clone, PartialEq)]
-pub struct Visible(pub VecDeque<ASTExpression>, pub Option<Token>);
+pub struct Visible {
+    pub(crate) visible_token: Token,
+
+    pub expressions: VecDeque<ASTExpression>,
+
+    pub exclamation_mark: Option<Token>,
+}
 
 impl Visible {
     pub(crate) fn parse(
@@ -22,7 +28,11 @@ impl Visible {
 
         let exclamation_mark = tokens.next_if_token_type_eq(TokenType::ExclamationMark);
 
-        Ok(Visible(expressions, exclamation_mark))
+        Ok(Visible {
+            visible_token: first_token,
+            expressions,
+            exclamation_mark,
+        })
     }
 }
 
@@ -47,13 +57,13 @@ mod tests {
 
         assert_eq!(
             Visible::parse(keyword.clone(), &mut tokens.clone().into()),
-            Ok(Visible(
-                [ASTExpression::Value(ASTExpressionValue::LiteralValue(
-                    tokens[0].clone()
-                ))]
-                .into(),
-                None
-            ))
+            Ok(Visible {
+                visible_token: keyword.clone(),
+                expressions: VecDeque::from([ASTExpression::Value(
+                    ASTExpressionValue::LiteralValue(tokens[0].clone())
+                )]),
+                exclamation_mark: None
+            })
         );
     }
 
@@ -67,13 +77,13 @@ mod tests {
 
         assert_eq!(
             Visible::parse(keyword.clone(), &mut tokens.clone().into()),
-            Ok(Visible(
-                [ASTExpression::Value(ASTExpressionValue::LiteralValue(
-                    tokens[0].clone()
-                ))]
-                .into(),
-                Some(tokens[1].clone())
-            ))
+            Ok(Visible {
+                visible_token: keyword.clone(),
+                expressions: VecDeque::from([ASTExpression::Value(
+                    ASTExpressionValue::LiteralValue(tokens[0].clone())
+                )]),
+                exclamation_mark: Some(tokens[1].clone())
+            })
         );
     }
 
@@ -83,7 +93,11 @@ mod tests {
 
         assert_eq!(
             Visible::parse(keyword.clone(), &mut tokens.clone().into()),
-            Ok(Visible([].into(), None))
+            Ok(Visible {
+                visible_token: keyword.clone(),
+                expressions: VecDeque::new(),
+                exclamation_mark: None
+            })
         );
     }
 
@@ -96,7 +110,11 @@ mod tests {
 
         assert_eq!(
             Visible::parse(keyword.clone(), &mut tokens.clone().into()),
-            Ok(Visible([].into(), Some(tokens[0].clone())))
+            Ok(Visible {
+                visible_token: keyword.clone(),
+                expressions: VecDeque::new(),
+                exclamation_mark: Some(tokens[0].clone())
+            })
         );
     }
 
@@ -124,8 +142,9 @@ mod tests {
                 first_token.clone(),
                 &mut StatementIterator::new(tokens.clone().into())
             ),
-            Ok(Visible(
-                VecDeque::from([
+            Ok(Visible {
+                visible_token: first_token.clone(),
+                expressions: VecDeque::from([
                     ASTExpression::NaryOperation(NaryOperation {
                         operator: NaryOpt::Smoosh(tokens[0].clone()),
                         expressions: vec![
@@ -180,8 +199,8 @@ mod tests {
                         ))),
                     })
                 ]),
-                Some(tokens[12].clone())
-            ))
+                exclamation_mark: Some(tokens[12].clone())
+            })
         );
     }
 }

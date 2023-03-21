@@ -6,14 +6,20 @@ use crate::parser::StatementIterator;
 
 /// A HAI "statement"
 #[derive(Debug, Clone, PartialEq)]
-pub struct Hai(pub VecDeque<Token>);
+pub struct Hai {
+    hai_token: Token,
+    pub(crate) version: VecDeque<Token>,
+}
 
 impl Hai {
     pub(crate) fn parse(
         first_token: Token,
         tokens: &mut StatementIterator,
     ) -> Result<Hai, ASTErrorType> {
-        Ok(Hai(tokens.next_statement()))
+        Ok(Hai {
+            hai_token: first_token,
+            version: tokens.next_statement(),
+        })
     }
 }
 
@@ -32,7 +38,10 @@ mod tests {
 
         assert_eq!(
             Hai::parse(first_token.clone(), &mut tokens.clone().into()),
-            Ok(Hai(tokens))
+            Ok(Hai {
+                version: tokens,
+                hai_token: first_token.clone()
+            })
         );
     }
 }

@@ -10,6 +10,7 @@ use crate::parser::expression::{parse_expression, ASTExpression};
 /// An `I IZ` statement, which is a function call
 #[derive(Debug, Clone, PartialEq)]
 pub struct IIz {
+    i_iz_token: Token,
     /// The name of the function. Note that this is of type VariableAccess, which means it can not
     /// only be an identifier, but it can also be a bukkit access, and the function should be
     /// placed inside the bukkit.
@@ -77,7 +78,11 @@ impl IIz {
             Some(token) => return Err(ASTErrorType::IIz(IIzError::MissingMkay(token))),
         }
 
-        Ok(IIz { name, arguments })
+        Ok(IIz {
+            i_iz_token: first_token,
+            name,
+            arguments,
+        })
     }
 }
 
@@ -102,8 +107,9 @@ mod tests {
         let first_token = block_tokens[0].pop_front().unwrap();
 
         assert_eq!(
-            IIz::parse(first_token, &mut block_tokens.clone().into()),
+            IIz::parse(first_token.clone(), &mut block_tokens.clone().into()),
             Ok(IIz {
+                i_iz_token: first_token.clone(),
                 name: VariableAccess {
                     identifier: Identifier {
                         name: block_tokens[0][0].clone(),
@@ -138,8 +144,9 @@ mod tests {
         let first_token = block_tokens[0].pop_front().unwrap();
 
         assert_eq!(
-            IIz::parse(first_token, &mut block_tokens.clone().into()),
+            IIz::parse(first_token.clone(), &mut block_tokens.clone().into()),
             Ok(IIz {
+                i_iz_token: first_token.clone(),
                 name: VariableAccess {
                     identifier: Identifier {
                         name: block_tokens[0][0].clone(),

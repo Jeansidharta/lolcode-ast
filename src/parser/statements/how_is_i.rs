@@ -10,6 +10,7 @@ use crate::parser::blocks::{parse_block_function, ASTBlock};
 /// A `HOW IZ I` statement, which is used to define a function.
 #[derive(Clone, Debug, PartialEq)]
 pub struct HowIzI {
+    how_iz_i_token: Token,
     /// The function name
     pub name: Identifier,
     /// A list of the function's arguments
@@ -72,6 +73,7 @@ impl HowIzI {
         tokens.next_statement_should_be_empty()?;
 
         Ok(HowIzI {
+            how_iz_i_token: first_token,
             body,
             name,
             arguments,
@@ -109,19 +111,21 @@ mod tests {
         let first_token = block_tokens[0].pop_front().unwrap();
 
         assert_eq!(
-            HowIzI::parse(first_token, &mut block_tokens.clone().into()),
+            HowIzI::parse(first_token.clone(), &mut block_tokens.clone().into()),
             Ok(HowIzI {
+                how_iz_i_token: first_token.clone(),
                 name: Identifier {
                     name: block_tokens[0][0].clone(),
                     srs: None
                 },
                 arguments: VecDeque::new(),
-                body: ASTBlock(VecDeque::from([Node::Visible(Visible(
-                    VecDeque::from([ASTExpression::Value(ASTExpressionValue::LiteralValue(
-                        block_tokens[1][1].clone()
-                    ))]),
-                    None
-                ))]))
+                body: ASTBlock(VecDeque::from([Node::Visible(Visible {
+                    visible_token: block_tokens[1][0].clone(),
+                    expressions: VecDeque::from([ASTExpression::Value(
+                        ASTExpressionValue::LiteralValue(block_tokens[1][1].clone())
+                    )]),
+                    exclamation_mark: None
+                })]))
             })
         )
     }
@@ -151,8 +155,9 @@ mod tests {
         let first_token = block_tokens[0].pop_front().unwrap();
 
         assert_eq!(
-            HowIzI::parse(first_token, &mut block_tokens.clone().into()),
+            HowIzI::parse(first_token.clone(), &mut block_tokens.clone().into()),
             Ok(HowIzI {
+                how_iz_i_token: first_token.clone(),
                 name: Identifier {
                     name: block_tokens[0][0].clone(),
                     srs: None
@@ -171,12 +176,13 @@ mod tests {
                         srs: None
                     },
                 ]),
-                body: ASTBlock(VecDeque::from([Node::Visible(Visible(
-                    VecDeque::from([ASTExpression::Value(ASTExpressionValue::LiteralValue(
-                        block_tokens[1][1].clone()
-                    ))]),
-                    None
-                ))]))
+                body: ASTBlock(VecDeque::from([Node::Visible(Visible {
+                    visible_token: block_tokens[1][0].clone(),
+                    expressions: VecDeque::from([ASTExpression::Value(
+                        ASTExpressionValue::LiteralValue(block_tokens[1][1].clone())
+                    )]),
+                    exclamation_mark: None
+                })]))
             })
         )
     }
