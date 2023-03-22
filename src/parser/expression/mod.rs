@@ -3,7 +3,9 @@ use crate::parser::error::ASTErrorType;
 use crate::parser::StatementIterator;
 
 pub(crate) mod identifier;
+mod identifier_iterator;
 pub(crate) mod variable_access;
+mod variable_access_iterator;
 
 pub use identifier::ASTType;
 use identifier::Identifier;

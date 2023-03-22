@@ -18,7 +18,7 @@ pub struct VariableAssignment {
 
 impl ASTStatement for VariableAssignment {
     fn range(&self) -> (&crate::lexer::Position, &crate::lexer::Position) {
-        todo!()
+        (self.variable_access.range().0, self.expression.range().1)
     }
     fn tokens(&self) -> Vec<&Token> {
         todo!()

@@ -7,6 +7,8 @@ use std::collections::VecDeque;
 
 use crate::lexer::{Token, TokenType};
 
+use super::variable_access_iterator::VariableAccessTokenIterator;
+
 /// A "VariableAccess" represents both a simple variable name, and a bukkit access.
 ///
 /// A simple variable name would be just an [Identifier][1] token in the code.
@@ -31,8 +33,20 @@ impl VariableAccess {
             .unwrap_or_else(|| self.identifier.name)
     }
 
+    /// Gets the range (first and last positions) of the entire Variable access
     pub fn range(&self) -> (&Position, &Position) {
-        todo!()
+        let identifier_range = self.identifier.range();
+        let mut last_position = identifier_range.1;
+        match self.accesses.back() {
+            Some(access) => last_position = access.range().1,
+            None => {}
+        };
+        (identifier_range.0, last_position)
+    }
+
+    /// Returns an iterator over all tokens used to construct the VariableAccess
+    pub fn tokens(&self) -> VariableAccessTokenIterator {
+        VariableAccessTokenIterator::new(self)
     }
 }
 
