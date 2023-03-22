@@ -72,27 +72,15 @@ impl IHasA {
         };
 
         let initial_value = match tokens.next() {
-            Some(Token {
-                token_type:
-                    TokenType::Keyword(
-                        token_type @ Keywords::NUMBR
-                        | token_type @ Keywords::NUMBAR
-                        | token_type @ Keywords::TROOF
-                        | token_type @ Keywords::NOOB
-                        | token_type @ Keywords::YARN
-                        | token_type @ Keywords::BUKKIT,
-                    ),
-                ..
-            }) => match token_type {
-                Keywords::NUMBR => IHasAInitialValue::Type(ASTType::Numbr),
-                Keywords::NUMBAR => IHasAInitialValue::Type(ASTType::Numbar),
-                Keywords::YARN => IHasAInitialValue::Type(ASTType::Yarn),
-                Keywords::NOOB => IHasAInitialValue::Type(ASTType::Noob),
-                Keywords::BUKKIT => IHasAInitialValue::Type(ASTType::Bukkit),
-                Keywords::TROOF => IHasAInitialValue::Type(ASTType::Troof),
-                _ => unreachable!(),
-            },
-            Some(token) => IHasAInitialValue::Expression(ASTExpression::parse(token, tokens)?),
+            Some(token) => {
+                let val = ASTType::try_from(token).map(|t| IHasAInitialValue::Type(t));
+                match val {
+                    Ok(val) => val,
+                    Err(token) => {
+                        IHasAInitialValue::Expression(ASTExpression::parse(token, tokens)?)
+                    }
+                }
+            }
             None => return Err(IHasAError::ExpectedInitialValue(assignment_token).into()),
         };
 
@@ -242,7 +230,7 @@ mod tests {
                     name: tokens[0].clone(),
                     srs: None
                 },
-                initial_value: Some(IHasAInitialValue::Type(ASTType::Yarn))
+                initial_value: Some(IHasAInitialValue::Type(ASTType::Yarn(tokens[2].clone())))
             })
         );
     }

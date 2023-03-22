@@ -59,15 +59,54 @@ impl Identifier {
 #[derive(Debug, PartialEq, Clone)]
 pub enum ASTType {
     /// An array
-    Bukkit,
+    Bukkit(Token),
     /// An integer number
-    Numbr,
+    Numbr(Token),
     /// A floating number
-    Numbar,
+    Numbar(Token),
     /// A string
-    Yarn,
+    Yarn(Token),
     /// A boolean
-    Troof,
+    Troof(Token),
     /// An null
-    Noob,
+    Noob(Token),
+}
+
+impl ASTType {
+    pub fn token(&self) -> &Token {
+        match self {
+            ASTType::Bukkit(token) => token,
+            ASTType::Numbr(token) => token,
+            ASTType::Numbar(token) => token,
+            ASTType::Yarn(token) => token,
+            ASTType::Troof(token) => token,
+            ASTType::Noob(token) => token,
+        }
+    }
+
+    pub fn into_token(self) -> Token {
+        match self {
+            ASTType::Bukkit(token) => token,
+            ASTType::Numbr(token) => token,
+            ASTType::Numbar(token) => token,
+            ASTType::Yarn(token) => token,
+            ASTType::Troof(token) => token,
+            ASTType::Noob(token) => token,
+        }
+    }
+}
+
+impl TryFrom<Token> for ASTType {
+    type Error = Token;
+    fn try_from(token: Token) -> Result<Self, Self::Error> {
+        match token.token_type {
+            TokenType::Keyword(Keywords::NUMBR) => Ok(ASTType::Numbr(token)),
+            TokenType::Keyword(Keywords::NUMBAR) => Ok(ASTType::Numbar(token)),
+            TokenType::Keyword(Keywords::YARN) => Ok(ASTType::Yarn(token)),
+            TokenType::Keyword(Keywords::NOOB) => Ok(ASTType::Noob(token)),
+            TokenType::Keyword(Keywords::BUKKIT) => Ok(ASTType::Bukkit(token)),
+            TokenType::Keyword(Keywords::TROOF) => Ok(ASTType::Troof(token)),
+            _ => Err(token),
+        }
+    }
 }
