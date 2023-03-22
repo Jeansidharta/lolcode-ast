@@ -22,6 +22,8 @@ pub struct Gtfo {
     gtfo_token: Token,
 }
 
-pub(crate) fn parse_gtfo(token: Token) -> Gtfo {
-    Gtfo { gtfo_token: token }
+impl Gtfo {
+    pub(crate) fn parse(token: Token) -> Gtfo {
+        Gtfo { gtfo_token: token }
+    }
 }

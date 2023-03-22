@@ -1,7 +1,7 @@
 use crate::lexer::{Keywords, Token, TokenType};
 use crate::parser::expression::variable_access::parse_identifier;
+use crate::parser::expression::ASTExpression;
 use crate::parser::expression::Identifier;
-use crate::parser::expression::{parse_expression, ASTExpression};
 use crate::parser::statements::ASTErrorType;
 use crate::parser::statements::VariableAccess;
 use crate::parser::StatementIterator;
@@ -58,7 +58,7 @@ impl BukkitSetSlot {
 
         let value = match tokens.next() {
             None => return Err(ASTErrorType::MissingToken(itz_token)),
-            Some(token) => parse_expression(token, tokens)?,
+            Some(token) => ASTExpression::parse(token, tokens)?,
         };
 
         Ok(BukkitSetSlot {

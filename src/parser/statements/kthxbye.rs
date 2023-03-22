@@ -6,8 +6,10 @@ pub struct KThxBye {
     k_thx_bye_token: Token,
 }
 
-pub(crate) fn parse_kthxbye(first_token: Token) -> KThxBye {
-    KThxBye {
-        k_thx_bye_token: first_token,
+impl KThxBye {
+    pub(crate) fn parse(first_token: Token) -> KThxBye {
+        KThxBye {
+            k_thx_bye_token: first_token,
+        }
     }
 }

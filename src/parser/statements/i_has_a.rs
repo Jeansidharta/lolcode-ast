@@ -1,8 +1,8 @@
 use crate::lexer::{Keywords, Token, TokenType};
 use crate::parser::expression::variable_access::parse_identifier;
+use crate::parser::expression::ASTExpression;
 use crate::parser::expression::ASTType;
 use crate::parser::expression::Identifier;
-use crate::parser::expression::{parse_expression, ASTExpression};
 use crate::parser::statements::ASTErrorType;
 use crate::parser::StatementIterator;
 
@@ -93,7 +93,7 @@ impl IHasA {
                 Keywords::TROOF => IHasAInitialValue::Type(ASTType::Troof),
                 _ => unreachable!(),
             },
-            Some(token) => IHasAInitialValue::Expression(parse_expression(token, tokens)?),
+            Some(token) => IHasAInitialValue::Expression(ASTExpression::parse(token, tokens)?),
             None => return Err(IHasAError::ExpectedInitialValue(assignment_token).into()),
         };
 

@@ -5,7 +5,7 @@ use crate::parser::StatementIterator;
 use std::collections::VecDeque;
 
 use crate::lexer::{Keywords, Token, TokenType};
-use crate::parser::expression::{parse_expression, ASTExpression};
+use crate::parser::expression::ASTExpression;
 
 /// An `I IZ` statement, which is a function call
 #[derive(Debug, Clone, PartialEq)]
@@ -61,7 +61,7 @@ impl IIz {
                 Some(token) => token,
                 None => return Err(ASTErrorType::IIz(IIzError::MissingArgument(yr_token))),
             };
-            arguments.push_back(parse_expression(first_expression_token, tokens)?);
+            arguments.push_back(ASTExpression::parse(first_expression_token, tokens)?);
             if tokens
                 .next_if(|token| matches!(token.token_type, TokenType::Keyword(Keywords::AN)))
                 .is_none()

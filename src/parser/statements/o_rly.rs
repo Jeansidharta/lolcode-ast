@@ -1,4 +1,3 @@
-use crate::parser::expression::parse_expression;
 use crate::parser::expression::ASTExpression;
 use crate::parser::statements::ASTErrorType;
 use crate::parser::StatementIterator;
@@ -80,7 +79,7 @@ impl ORly {
                 None => return Err(ORlyError::MissingMebbeExpression(mebbe_token).into()),
                 Some(token) => token,
             };
-            let condition = parse_expression(first_expression_token, tokens)?;
+            let condition = ASTExpression::parse(first_expression_token, tokens)?;
             tokens.next_statement_should_be_empty()?;
             mebbes.push_back(Mebbe {
                 mebbe_token,

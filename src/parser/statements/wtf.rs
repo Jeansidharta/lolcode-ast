@@ -4,7 +4,7 @@ use std::collections::VecDeque;
 
 use crate::lexer::{Keywords, Token, TokenType};
 use crate::parser::blocks::{parse_block_switch, ASTBlock};
-use crate::parser::expression::{parse_expression, ASTExpression};
+use crate::parser::expression::ASTExpression;
 
 use super::o_rly::ORlyError;
 
@@ -50,7 +50,7 @@ impl Wtf {
                 None => return Err(ASTErrorType::MissingToken(omg_token)),
                 Some(token) => token,
             };
-            let expression = parse_expression(first_token, tokens)?;
+            let expression = ASTExpression::parse(first_token, tokens)?;
             tokens.next_statement_should_be_empty()?;
             omg.push_back(WtfOmg {
                 omg_token,

@@ -1,5 +1,5 @@
 use crate::lexer::{Keywords, Token, TokenType};
-use crate::parser::expression::{parse_expression, ASTExpression};
+use crate::parser::expression::ASTExpression;
 use crate::parser::statements::ASTErrorType;
 use crate::parser::statements::VariableAccess;
 use crate::parser::StatementIterator;
@@ -52,7 +52,7 @@ impl VariableAssignment {
         };
 
         let value = match tokens.next() {
-            Some(initial_token) => parse_expression(initial_token, tokens)?,
+            Some(initial_token) => ASTExpression::parse(initial_token, tokens)?,
             None => return Err(VariableAssignmentError::ExpectedValue(r_token).into()),
         };
 

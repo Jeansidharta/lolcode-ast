@@ -1,6 +1,5 @@
 use crate::lexer::{Keywords, Token, TokenType};
 use crate::parser::blocks::parse_block_loop;
-use crate::parser::expression::parse_expression;
 use crate::parser::expression::variable_access::parse_variable_access;
 use crate::parser::expression::VariableAccess;
 use crate::parser::statements::ASTErrorType;
@@ -200,7 +199,7 @@ fn parse_conditional(
                 Some(token) => token,
             };
 
-            parse_expression(first_conditional_token, tokens)
+            ASTExpression::parse(first_conditional_token, tokens)
         }};
     }
 

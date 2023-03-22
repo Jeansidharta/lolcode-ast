@@ -1,5 +1,4 @@
 use crate::lexer::Token;
-use crate::parser::expression::parse_expression;
 use crate::parser::expression::ASTExpression;
 use crate::parser::statements::ASTErrorType;
 use crate::parser::StatementIterator;
@@ -19,20 +18,22 @@ pub struct FoundYr {
     pub(crate) expression: ASTExpression,
 }
 
-pub(crate) fn parse_found_yr(
-    first_token: Token,
-    tokens: &mut StatementIterator,
-) -> Result<FoundYr, ASTErrorType> {
-    let next_token = match tokens.next() {
-        Some(token) => token,
-        None => return Err(ASTErrorType::MissingToken(first_token)),
-    };
-    let expression = parse_expression(next_token, tokens)?;
+impl FoundYr {
+    pub(crate) fn parse(
+        first_token: Token,
+        tokens: &mut StatementIterator,
+    ) -> Result<FoundYr, ASTErrorType> {
+        let next_token = match tokens.next() {
+            Some(token) => token,
+            None => return Err(ASTErrorType::MissingToken(first_token)),
+        };
+        let expression = ASTExpression::parse(next_token, tokens)?;
 
-    Ok(FoundYr {
-        found_yr_token: first_token,
-        expression,
-    })
+        Ok(FoundYr {
+            found_yr_token: first_token,
+            expression,
+        })
+    }
 }
 
 #[cfg(test)]
@@ -52,7 +53,7 @@ mod tests {
         let ident = &keyword + TokenType::Identifier("Batata".to_string());
 
         assert_eq!(
-            parse_found_yr(
+            FoundYr::parse(
                 keyword.clone(),
                 &mut StatementIterator::new(vec![ident.clone()])
             ),
@@ -76,7 +77,7 @@ mod tests {
         let keyword = Token::from(TokenType::Keyword(Keywords::GIMMEH));
 
         assert_eq!(
-            parse_found_yr(keyword.clone(), &mut StatementIterator::new(vec![])),
+            FoundYr::parse(keyword.clone(), &mut StatementIterator::new(vec![])),
             Err(ASTErrorType::MissingToken(keyword.clone()))
         );
     }

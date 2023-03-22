@@ -14,8 +14,6 @@ use self::visible::Visible;
 use self::wtf::Wtf;
 use crate::parser::error::ASTErrorType;
 
-use crate::parser::expression::parse_expression;
-
 use super::expression::variable_access::{is_valid_variable_access, parse_variable_access};
 use super::expression::{ASTExpression, ASTExpressionValue};
 use crate::lexer::{Keywords, Token, TokenType};
@@ -233,14 +231,14 @@ pub(crate) fn parse_statement(
             Visible::parse(first_token, tokens).map(|t| t.into())
         }
         TokenType::Keyword(Keywords::GIMMEH) => {
-            gimmeh::parse_gimmeh(first_token, tokens).map(|t| t.into())
+            gimmeh::Gimmeh::parse(first_token, tokens).map(|t| t.into())
         }
         TokenType::Keyword(Keywords::FOUND_YR) => {
-            found_yr::parse_found_yr(first_token, tokens).map(|t| t.into())
+            found_yr::FoundYr::parse(first_token, tokens).map(|t| t.into())
         }
         TokenType::Keyword(Keywords::HAI) => Hai::parse(first_token, tokens).map(|t| t.into()),
-        TokenType::Keyword(Keywords::KTHXBYE) => Ok(kthxbye::parse_kthxbye(first_token).into()),
-        TokenType::Keyword(Keywords::GTFO) => Ok(gtfo::parse_gtfo(first_token).into()),
+        TokenType::Keyword(Keywords::KTHXBYE) => Ok(kthxbye::KThxBye::parse(first_token).into()),
+        TokenType::Keyword(Keywords::GTFO) => Ok(gtfo::Gtfo::parse(first_token).into()),
         TokenType::Keyword(Keywords::I_IZ) => IIz::parse(first_token, tokens).map(|t| t.into()),
         TokenType::Keyword(Keywords::IM_IN_YR) => {
             ImInYr::parse(first_token, tokens).map(|t| t.into())
@@ -251,6 +249,6 @@ pub(crate) fn parse_statement(
         TokenType::Keyword(Keywords::WTF) => Wtf::parse(first_token, tokens).map(|t| t.into()),
         TokenType::Keyword(Keywords::O_RLY) => ORly::parse(first_token, tokens).map(|t| t.into()),
         // Try to parse it as an expression
-        _ => parse_expression(first_token, tokens).map(|e| Node::Expression(e)),
+        _ => ASTExpression::parse(first_token, tokens).map(|e| Node::Expression(e)),
     }
 }

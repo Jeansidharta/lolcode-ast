@@ -16,16 +16,18 @@ pub struct Gimmeh {
     variable_access: VariableAccess,
 }
 
-pub(crate) fn parse_gimmeh(
-    first_token: Token,
-    tokens: &mut StatementIterator,
-) -> Result<Gimmeh, ASTErrorType> {
-    match tokens.next() {
-        Some(token) => Ok(Gimmeh {
-            variable_access: parse_variable_access(token, tokens)?,
-            gimmeh_token: first_token,
-        }),
-        None => Err(ASTErrorType::MissingToken(first_token)),
+impl Gimmeh {
+    pub(crate) fn parse(
+        first_token: Token,
+        tokens: &mut StatementIterator,
+    ) -> Result<Gimmeh, ASTErrorType> {
+        match tokens.next() {
+            Some(token) => Ok(Gimmeh {
+                variable_access: parse_variable_access(token, tokens)?,
+                gimmeh_token: first_token,
+            }),
+            None => Err(ASTErrorType::MissingToken(first_token)),
+        }
     }
 }
 
@@ -48,7 +50,7 @@ mod tests {
         ]);
 
         assert_eq!(
-            parse_gimmeh(keyword.clone(), &mut tokens.clone().into()),
+            Gimmeh::parse(keyword.clone(), &mut tokens.clone().into()),
             Ok(Gimmeh {
                 gimmeh_token: keyword.clone(),
                 variable_access: VariableAccess {
@@ -70,7 +72,7 @@ mod tests {
         ]);
 
         assert_eq!(
-            parse_gimmeh(keyword, &mut tokens.clone().into()),
+            Gimmeh::parse(keyword, &mut tokens.clone().into()),
             Err(ASTErrorType::UnexpectedToken(tokens[0].clone()))
         );
     }
@@ -80,7 +82,7 @@ mod tests {
         let (keyword, tokens) = Token::chain_types(vec![TokenType::Keyword(Keywords::GIMMEH)]);
 
         assert_eq!(
-            parse_gimmeh(keyword.clone(), &mut tokens.clone().into()),
+            Gimmeh::parse(keyword.clone(), &mut tokens.clone().into()),
             Err(ASTErrorType::MissingToken(keyword.clone()))
         );
     }

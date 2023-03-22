@@ -3,7 +3,7 @@ use crate::parser::StatementIterator;
 use std::collections::VecDeque;
 
 use crate::lexer::{Token, TokenType};
-use crate::parser::expression::{parse_expression, ASTExpression};
+use crate::parser::expression::ASTExpression;
 
 /// The `VISIBLE` statement. It can accept multiple statements, and an optional "!" at the end to
 /// prevent a newline from being printed
@@ -21,7 +21,7 @@ impl Visible {
     ) -> Result<Visible, ASTErrorType> {
         let mut expressions: VecDeque<ASTExpression> = VecDeque::new();
         while let Some(token) = tokens.next_if_token_type_ne(TokenType::ExclamationMark) {
-            expressions.push_back(parse_expression(token, tokens)?);
+            expressions.push_back(ASTExpression::parse(token, tokens)?);
         }
 
         let exclamation_mark = tokens.next_if_token_type_eq(TokenType::ExclamationMark);
