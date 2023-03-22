@@ -34,13 +34,10 @@ impl<'a> Iterator for VariableAccessTokenIterator<'a> {
                 self.next()
             }
             VariableAccessTokenIteratorState::Identifier(ref mut ident_iterator) => {
-                match ident_iterator.next() {
-                    Some(val) => Some(val),
-                    None => {
-                        self.state = VariableAccessTokenIteratorState::Access((0, None));
-                        self.next()
-                    }
-                }
+                ident_iterator.next().or_else(|| {
+                    self.state = VariableAccessTokenIteratorState::Access((0, None));
+                    self.next()
+                })
             }
             VariableAccessTokenIteratorState::Access((index, ref mut ident_iter)) => {
                 match ident_iter.as_mut().and_then(|t| t.next()) {

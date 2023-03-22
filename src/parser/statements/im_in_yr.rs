@@ -277,7 +277,11 @@ mod tests {
     use crate::{
         lexer::{Keywords, NumberToken, TokenType, TokenValue},
         parser::{
-            expression::{identifier::Identifier, ASTExpressionValue, BinaryOperation, BinaryOpt},
+            expression::{
+                binary_operation::{BinaryOperation, BinaryOpt},
+                identifier::Identifier,
+                ASTExpressionValue,
+            },
             statements::{assignment::VariableAssignment, visible::Visible, Node},
         },
     };

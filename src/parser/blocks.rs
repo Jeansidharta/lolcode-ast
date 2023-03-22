@@ -193,7 +193,9 @@ pub fn parse_block_switch(statement_iterator: &mut StatementIterator) -> ASTBloc
 mod tests {
     use crate::parser::{
         expression::{
-            identifier::Identifier, ASTExpressionValue, BinaryOperation, BinaryOpt, VariableAccess,
+            binary_operation::{BinaryOperation, BinaryOpt},
+            identifier::Identifier,
+            ASTExpressionValue, VariableAccess,
         },
         statements::{found_yr::FoundYr, i_has_a::IHasAInitialValue},
     };

@@ -1,9 +1,20 @@
 use crate::lexer::{Keywords, Position, Token, TokenType};
 use crate::parser::error::ASTErrorType;
+use crate::parser::expression::binary_operation::BinaryOperation;
+use crate::parser::expression::nary_operations::NaryOperation;
+use crate::parser::expression::nary_operations::NaryOpt;
+use crate::parser::expression::unary_operation::UnaryOperation;
+use crate::parser::expression::unary_operation::UnaryOpt;
 use crate::parser::StatementIterator;
 
+/// Things related to any binary operations, such as `SUM OF a AN b`
+pub mod binary_operation;
 pub(crate) mod identifier;
 mod identifier_iterator;
+/// Things related to any Nary operations, such as `SMOOSH a AN b AN c MKAY`
+pub mod nary_operations;
+/// Things related to any unary operations, such as `NOT b`
+pub mod unary_operation;
 pub(crate) mod variable_access;
 mod variable_access_iterator;
 
@@ -11,175 +22,59 @@ pub use identifier::ASTType;
 use identifier::Identifier;
 pub use variable_access::VariableAccess;
 
-/// All binary operators. Each variant represents a different operation. The associated token is
-/// a keyword token that generated the operator.
-#[derive(Debug, PartialEq, Clone)]
-pub enum BinaryOpt {
-    /// Checks if left or right are true (left || right)
-    /// ```LOLCode
-    /// EITHER OF left AN right
-    /// ```
-    EitherOf(Token),
-    /// A XOR between the left operant and the right operand. Will be true if left is different.
-    /// than right.
-    /// ```LOLCode
-    /// WON OF left AN right
-    /// ```
-    WonOf(Token),
-    /// Adds both operands as a number (left + right).
-    /// ```LOLCode
-    /// SUM OF left AN right
-    /// ```
-    SumOf(Token),
-    /// Subtract right from left (left - right).
-    /// ```LOLCode
-    /// DIFF OF left AN right
-    /// ```
-    DiffOf(Token),
-    /// Multiplies left and right (left * right).
-    /// ```LOLCode
-    /// DIFF OF left AN right
-    /// ```
-    ProduktOf(Token),
-    /// Divides left and right (left / right).
-    /// ```LOLCode
-    /// QUOSHUNT OF left AN right
-    /// ```
-    QuoshuntOf(Token),
-    /// Remainder of a division between left and right (left % right).
-    /// ```LOLCode
-    /// MOD OF left AN right
-    /// ```
-    ModOf(Token),
-    /// Checks if left is bigger than right (left > right).
-    /// ```LOLCode
-    /// BIGGR OF left AN right
-    /// ```
-    BiggrOf(Token),
-    /// Checks of left is smaller than right (left < right).
-    /// ```LOLCode
-    /// SMALLR OF left AN right
-    /// ```
-    SmallrOf(Token),
-    /// Checks if left is equal to right (left == right)
-    /// ```LOLCode
-    /// BOTH SAME left AN right
-    /// ```
-    BothSaem(Token),
-    /// Checks if left and right are both true (left && right)
-    /// ```LOLCode
-    /// BOTH OF left AN right
-    /// ```
-    BothOf(Token),
-    /// Checks if left is different from right (left != right)
-    /// ```LOLCode
-    /// DIFFRINT left AN right
-    /// ```
-    Diffrint(Token),
+use self::binary_operation::{BinaryOperationIterator, BinaryOpt};
+use self::nary_operations::{NaryOperationIterator, NaryOperationOperand};
+use self::unary_operation::UnaryOperationIterator;
+use self::variable_access_iterator::VariableAccessTokenIterator;
+
+enum ASTExpressionValueState<'a> {
+    Start,
+    VariableAccess(VariableAccessTokenIterator<'a>),
+    End,
 }
 
-impl BinaryOpt {
-    /// Gets a reference to the token inside the operator
-    pub fn token(&self) -> &Token {
-        match self {
-            BinaryOpt::EitherOf(token) => token,
-            BinaryOpt::WonOf(token) => token,
-            BinaryOpt::SumOf(token) => token,
-            BinaryOpt::DiffOf(token) => token,
-            BinaryOpt::ProduktOf(token) => token,
-            BinaryOpt::QuoshuntOf(token) => token,
-            BinaryOpt::ModOf(token) => token,
-            BinaryOpt::BiggrOf(token) => token,
-            BinaryOpt::SmallrOf(token) => token,
-            BinaryOpt::BothSaem(token) => token,
-            BinaryOpt::BothOf(token) => token,
-            BinaryOpt::Diffrint(token) => token,
-        }
-    }
+/// Iterator over an ASTExpressionValue's tokens.
+///
+/// DOC TODO: show how to instantiate this
+pub struct ASTExpressionValueIterator<'a> {
+    value: &'a ASTExpressionValue,
+    state: ASTExpressionValueState<'a>,
+}
 
-    /// Extracts the token from inside the operator, consuming the operator
-    pub fn into_token(self) -> Token {
-        match self {
-            BinaryOpt::EitherOf(token) => token,
-            BinaryOpt::WonOf(token) => token,
-            BinaryOpt::SumOf(token) => token,
-            BinaryOpt::DiffOf(token) => token,
-            BinaryOpt::ProduktOf(token) => token,
-            BinaryOpt::QuoshuntOf(token) => token,
-            BinaryOpt::ModOf(token) => token,
-            BinaryOpt::BiggrOf(token) => token,
-            BinaryOpt::SmallrOf(token) => token,
-            BinaryOpt::BothSaem(token) => token,
-            BinaryOpt::BothOf(token) => token,
-            BinaryOpt::Diffrint(token) => token,
+impl<'a> ASTExpressionValueIterator<'a> {
+    pub(crate) fn new(value: &'a ASTExpressionValue) -> Self {
+        Self {
+            value,
+            state: ASTExpressionValueState::Start,
         }
     }
 }
 
-/// All unary operators. Each variant represents a different operation. The associated token is
-/// a keyword token that generated the operator.
-#[derive(Debug, PartialEq, Clone)]
-pub enum UnaryOpt {
-    /// Converts the operand to a boolean, and then negates it.
-    /// ```LOLCode
-    /// NOT operand
-    /// ```
-    Not(Token),
-}
+impl<'a> Iterator for ASTExpressionValueIterator<'a> {
+    type Item = &'a Token;
 
-impl UnaryOpt {
-    /// Extracts the token from inside the operator, consuming the operator
-    pub fn into_token(self) -> Token {
-        match self {
-            UnaryOpt::Not(token) => token,
-        }
-    }
-
-    /// Gets a reference to the token inside the operator
-    pub fn token(&self) -> &Token {
-        match self {
-            UnaryOpt::Not(token) => token,
-        }
-    }
-}
-
-/// All operators that can have any number of operands. Each variant represents a different operation. The associated token is
-/// a keyword token that generated the operator.
-#[derive(Debug, PartialEq, Clone)]
-pub enum NaryOpt {
-    /// Checks if all operands are true. (A && B && C && ...)
-    /// ```LOLCode
-    /// ALL OF A AN B AN C MKAY
-    /// ```
-    AllOf(Token),
-    /// Concatenates all string operands
-    /// ```LOLCode
-    /// SMOOSH A AN B AN C MKAY
-    /// ```
-    Smoosh(Token),
-    /// Checks if any operands are true. (A || B || C || ...)
-    /// ```LOLCode
-    /// ANY OF A AN B AN C MKAY
-    /// ```
-    AnyOf(Token),
-}
-
-impl NaryOpt {
-    /// Extracts the token from inside the operator, consuming the operator
-    pub fn into_token(self) -> Token {
-        match self {
-            NaryOpt::AllOf(token) => token,
-            NaryOpt::Smoosh(token) => token,
-            NaryOpt::AnyOf(token) => token,
-        }
-    }
-
-    /// Gets a reference to the token inside the operator
-    pub fn token(&self) -> &Token {
-        match self {
-            NaryOpt::AllOf(token) => token,
-            NaryOpt::Smoosh(token) => token,
-            NaryOpt::AnyOf(token) => token,
+    fn next(&mut self) -> Option<Self::Item> {
+        match self.state {
+            ASTExpressionValueState::Start => match self.value {
+                ASTExpressionValue::VariableAccess(var_access) => {
+                    self.state = ASTExpressionValueState::VariableAccess(var_access.tokens());
+                    self.next()
+                }
+                ASTExpressionValue::LiteralValue(token) => {
+                    self.state = ASTExpressionValueState::End;
+                    Some(token)
+                }
+            },
+            ASTExpressionValueState::VariableAccess(ref mut var_access_iter) => {
+                match var_access_iter.next() {
+                    Some(token) => Some(token),
+                    None => {
+                        self.state = ASTExpressionValueState::End;
+                        self.next()
+                    }
+                }
+            }
+            ASTExpressionValueState::End => None,
         }
     }
 }
@@ -202,6 +97,11 @@ impl ASTExpressionValue {
             ASTExpressionValue::LiteralValue(token) => (&token.range.0, &token.range.1),
         }
     }
+
+    /// Returns an iterator over the tokens used to create this
+    pub fn tokens<'a>(&'a self) -> ASTExpressionValueIterator<'a> {
+        ASTExpressionValueIterator::new(self)
+    }
 }
 
 impl From<VariableAccess> for ASTExpressionValue {
@@ -220,28 +120,73 @@ impl TryFrom<Token> for ASTExpressionValue {
     }
 }
 
-/// A operations with exactly two operands
-#[derive(Debug, PartialEq, Clone)]
-pub struct BinaryOperation {
-    pub(crate) left: Box<ASTExpression>,
-    pub(crate) operator: BinaryOpt,
-    pub(crate) right: Box<ASTExpression>,
-    pub(crate) an_token: Option<Token>,
+enum ASTExpressionIteratorState<'a> {
+    Start,
+    Binary(Box<BinaryOperationIterator<'a>>),
+    Unary(Box<UnaryOperationIterator<'a>>),
+    Nary(Box<NaryOperationIterator<'a>>),
+    Value(ASTExpressionValueIterator<'a>),
+    End,
 }
 
-/// A operation with exactly one operand
-#[derive(Debug, PartialEq, Clone)]
-pub struct UnaryOperation {
-    pub(crate) operator: UnaryOpt,
-    pub(crate) expression: Box<ASTExpression>,
+/// Iterator over an ASTExpression's tokens.
+///
+/// DOC TODO: show how to instantiate this
+pub struct ASTExpressionIterator<'a> {
+    expression: &'a ASTExpression,
+    state: ASTExpressionIteratorState<'a>,
 }
 
-/// A operation with any number of operands
-#[derive(Debug, PartialEq, Clone)]
-pub struct NaryOperation {
-    pub(crate) operator: NaryOpt,
-    pub(crate) expressions: Vec<(ASTExpression, Option<Token>)>,
-    pub(crate) mkay_token: Option<Token>,
+impl<'a> ASTExpressionIterator<'a> {
+    pub(crate) fn new(expression: &'a ASTExpression) -> Self {
+        Self {
+            expression,
+            state: ASTExpressionIteratorState::Start,
+        }
+    }
+}
+
+impl<'a> Iterator for ASTExpressionIterator<'a> {
+    type Item = &'a Token;
+    fn next(&mut self) -> Option<Self::Item> {
+        match self.state {
+            ASTExpressionIteratorState::Start => match self.expression {
+                ASTExpression::BinaryOperation(opt) => {
+                    self.state = ASTExpressionIteratorState::Binary(Box::new(opt.tokens()));
+                    self.next()
+                }
+                ASTExpression::UnaryOperation(opt) => {
+                    self.state = ASTExpressionIteratorState::Unary(Box::new(opt.tokens()));
+                    self.next()
+                }
+                ASTExpression::NaryOperation(opt) => {
+                    self.state = ASTExpressionIteratorState::Nary(Box::new(opt.tokens()));
+                    self.next()
+                }
+                ASTExpression::Value(value) => {
+                    self.state = ASTExpressionIteratorState::Value(value.tokens());
+                    self.next()
+                }
+            },
+            ASTExpressionIteratorState::Value(ref mut iter) => iter.next().or_else(|| {
+                self.state = ASTExpressionIteratorState::End;
+                None
+            }),
+            ASTExpressionIteratorState::Binary(ref mut iter) => iter.next().or_else(|| {
+                self.state = ASTExpressionIteratorState::End;
+                None
+            }),
+            ASTExpressionIteratorState::Unary(ref mut iter) => iter.next().or_else(|| {
+                self.state = ASTExpressionIteratorState::End;
+                None
+            }),
+            ASTExpressionIteratorState::Nary(ref mut iter) => iter.next().or_else(|| {
+                self.state = ASTExpressionIteratorState::End;
+                None
+            }),
+            ASTExpressionIteratorState::End => None,
+        }
+    }
 }
 
 /// A LOLCODE expression.
@@ -298,14 +243,28 @@ impl ASTExpression {
                     .or_else(|| {
                         expressions
                             .last()
-                            .map(|(_, t)| t.as_ref().map(|t| &t.range.1))
+                            .map(|NaryOperationOperand { an_token, .. }| {
+                                an_token.as_ref().map(|t| &t.range.1)
+                            })
                             .flatten()
                     })
-                    .or_else(|| expressions.last().map(|(expr, _)| expr.range().1))
+                    .or_else(|| {
+                        expressions.last().map(
+                            |NaryOperationOperand {
+                                 operand: expression,
+                                 ..
+                             }| expression.range().1,
+                        )
+                    })
                     .unwrap_or_else(|| &operator.token().range.1),
             ),
             ASTExpression::Value(value) => value.range(),
         }
+    }
+
+    /// Returns an iterator over the tokens used to generate this
+    pub fn tokens<'a>(&'a self) -> ASTExpressionIterator<'a> {
+        ASTExpressionIterator::new(self)
     }
 }
 
@@ -456,11 +415,11 @@ fn parse_nary_expression(
     operator: NaryOpt,
     tokens: &mut StatementIterator,
 ) -> Result<ASTExpression, ASTErrorType> {
-    let mut expressions: Vec<(ASTExpression, Option<Token>)> = Vec::new();
+    let mut expressions = Vec::new();
     while let Some(token) = tokens.next_if_token_type_ne(TokenType::Keyword(Keywords::MKAY)) {
         let operand = ASTExpression::parse(token, tokens)?;
         let an_token = tokens.next_if_token_type_eq(TokenType::Keyword(Keywords::AN));
-        expressions.push((operand, an_token));
+        expressions.push(NaryOperationOperand { operand, an_token });
     }
     let mkay_token = tokens.next();
     Ok(ASTExpression::NaryOperation(NaryOperation {

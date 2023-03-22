@@ -40,8 +40,10 @@ mod tests {
     use crate::{
         lexer::{Keywords, NumberToken::Int, Token, TokenValue},
         parser::expression::{
-            identifier::Identifier, ASTExpressionValue, BinaryOperation, BinaryOpt, NaryOperation,
-            NaryOpt, VariableAccess,
+            binary_operation::{BinaryOperation, BinaryOpt},
+            identifier::Identifier,
+            nary_operations::{NaryOperation, NaryOperationOperand, NaryOpt},
+            ASTExpressionValue, VariableAccess,
         },
     };
     use pretty_assertions::assert_eq;
@@ -146,14 +148,14 @@ mod tests {
                     ASTExpression::NaryOperation(NaryOperation {
                         operator: NaryOpt::Smoosh(tokens[0].clone()),
                         expressions: vec![
-                            (
-                                ASTExpression::Value(ASTExpressionValue::LiteralValue(
+                            NaryOperationOperand {
+                                operand: ASTExpression::Value(ASTExpressionValue::LiteralValue(
                                     tokens[1].clone(),
                                 )),
-                                Some(tokens[2].clone())
-                            ),
-                            (
-                                ASTExpression::BinaryOperation(BinaryOperation {
+                                an_token: Some(tokens[2].clone())
+                            },
+                            NaryOperationOperand {
+                                operand: ASTExpression::BinaryOperation(BinaryOperation {
                                     operator: BinaryOpt::SumOf(tokens[3].clone()),
                                     left: Box::new(ASTExpression::Value(
                                         ASTExpressionValue::LiteralValue(tokens[4].clone())
@@ -163,10 +165,10 @@ mod tests {
                                         ASTExpressionValue::LiteralValue(tokens[5].clone())
                                     ))
                                 }),
-                                None
-                            ),
-                            (
-                                ASTExpression::Value(ASTExpressionValue::VariableAccess(
+                                an_token: None
+                            },
+                            NaryOperationOperand {
+                                operand: ASTExpression::Value(ASTExpressionValue::VariableAccess(
                                     VariableAccess {
                                         identifier: Identifier {
                                             name: tokens[6].clone(),
@@ -175,8 +177,8 @@ mod tests {
                                         accesses: VecDeque::new()
                                     }
                                 )),
-                                None
-                            )
+                                an_token: None,
+                            }
                         ],
                         mkay_token: Some(tokens[7].clone()),
                     }),

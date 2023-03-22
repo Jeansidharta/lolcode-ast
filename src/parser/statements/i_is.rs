@@ -93,7 +93,9 @@ mod tests {
     use crate::{
         lexer::{Keywords, TokenType},
         parser::expression::{
-            identifier::Identifier, ASTExpressionValue, BinaryOperation, BinaryOpt,
+            binary_operation::{BinaryOperation, BinaryOpt},
+            identifier::Identifier,
+            ASTExpressionValue,
         },
     };
     use pretty_assertions::assert_eq;
