@@ -203,4 +203,60 @@ mod tests {
             Err(VariableAssignmentError::MissingR(identifier).into())
         );
     }
+
+    #[test]
+    fn iterator_simple_assignment() {
+        let mut tokens = Token::make_line(
+            vec![
+                TokenType::Identifier("A".to_string()),
+                TokenType::Keyword(Keywords::R),
+                TokenType::Keyword(Keywords::NOOB),
+            ],
+            0,
+        );
+
+        let first_token = tokens.pop_front().unwrap();
+        let mut statement_iterator: StatementIterator = tokens.clone().into();
+        let variable_access =
+            VariableAccess::parse(first_token.clone(), &mut statement_iterator).unwrap();
+        let expression =
+            VariableAssignment::parse(variable_access, &mut statement_iterator).unwrap();
+        let mut iter = expression.tokens();
+
+        assert_eq!(iter.next(), Some(&first_token));
+        assert_eq!(iter.next(), Some(&tokens[0]));
+        assert_eq!(iter.next(), Some(&tokens[1]));
+        assert_eq!(iter.next(), None);
+    }
+
+    #[test]
+    fn iterator_expression() {
+        let mut tokens = Token::make_line(
+            vec![
+                TokenType::Identifier("A".to_string()),
+                TokenType::Keyword(Keywords::R),
+                TokenType::Keyword(Keywords::EITHER_OF),
+                TokenType::Keyword(Keywords::NOOB),
+                TokenType::Keyword(Keywords::AN),
+                TokenType::Keyword(Keywords::NOOB),
+            ],
+            0,
+        );
+
+        let first_token = tokens.pop_front().unwrap();
+        let mut statement_iterator: StatementIterator = tokens.clone().into();
+        let variable_access =
+            VariableAccess::parse(first_token.clone(), &mut statement_iterator).unwrap();
+        let expression =
+            VariableAssignment::parse(variable_access, &mut statement_iterator).unwrap();
+        let mut iter = expression.tokens();
+
+        assert_eq!(iter.next(), Some(&first_token));
+        assert_eq!(iter.next(), Some(&tokens[0]));
+        assert_eq!(iter.next(), Some(&tokens[1]));
+        assert_eq!(iter.next(), Some(&tokens[2]));
+        assert_eq!(iter.next(), Some(&tokens[3]));
+        assert_eq!(iter.next(), Some(&tokens[4]));
+        assert_eq!(iter.next(), None);
+    }
 }
