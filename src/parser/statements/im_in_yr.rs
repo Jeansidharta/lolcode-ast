@@ -277,7 +277,7 @@ mod tests {
     use crate::{
         lexer::{Keywords, NumberToken, TokenType, TokenValue},
         parser::{
-            expression::{ASTExpressionValue, BinaryOperation, BinaryOpt, Identifier},
+            expression::{identifier::Identifier, ASTExpressionValue, BinaryOperation, BinaryOpt},
             statements::{assignment::VariableAssignment, visible::Visible, Node},
         },
     };

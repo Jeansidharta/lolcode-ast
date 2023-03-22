@@ -40,8 +40,8 @@ mod tests {
     use crate::{
         lexer::{Keywords, NumberToken::Int, Token, TokenValue},
         parser::expression::{
-            ASTExpressionValue, BinaryOperation, BinaryOpt, Identifier, NaryOperation, NaryOpt,
-            VariableAccess,
+            identifier::Identifier, ASTExpressionValue, BinaryOperation, BinaryOpt, NaryOperation,
+            NaryOpt, VariableAccess,
         },
     };
     use pretty_assertions::assert_eq;

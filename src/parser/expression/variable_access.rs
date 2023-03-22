@@ -1,7 +1,7 @@
 use crate::lexer::Keywords;
 use crate::lexer::Position;
 use crate::parser::error::ASTErrorType;
-use crate::parser::Identifier;
+use crate::parser::expression::Identifier;
 use crate::parser::StatementIterator;
 use std::collections::VecDeque;
 
@@ -17,10 +17,10 @@ use crate::lexer::{Token, TokenType};
 #[derive(Debug, PartialEq, Clone)]
 pub struct VariableAccess {
     /// The first identifier used.
-    pub identifier: Identifier,
+    pub(crate) identifier: Identifier,
     /// The other identifiers used after the
     /// BukkitSlotAccess
-    pub accesses: VecDeque<Identifier>,
+    pub(crate) accesses: VecDeque<Identifier>,
 }
 
 impl VariableAccess {
@@ -31,7 +31,7 @@ impl VariableAccess {
             .unwrap_or_else(|| self.identifier.name)
     }
 
-    pub(crate) fn range(&self) -> (&Position, &Position) {
+    pub fn range(&self) -> (&Position, &Position) {
         todo!()
     }
 }

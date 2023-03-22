@@ -1,6 +1,6 @@
+use crate::parser::expression::identifier::Identifier;
 use crate::parser::expression::variable_access::parse_identifier;
 use crate::parser::statements::ASTErrorType;
-use crate::parser::Identifier;
 use crate::parser::StatementIterator;
 use std::collections::VecDeque;
 
@@ -88,7 +88,7 @@ mod tests {
     use crate::{
         lexer::{Keywords, TokenType, TokenValue},
         parser::{
-            expression::{ASTExpression, ASTExpressionValue},
+            expression::{identifier::Identifier, ASTExpression, ASTExpressionValue},
             statements::{visible::Visible, Node},
         },
     };

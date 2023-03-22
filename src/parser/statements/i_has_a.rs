@@ -1,8 +1,8 @@
 use crate::lexer::{Keywords, Token, TokenType};
+use crate::parser::expression::identifier::Identifier;
 use crate::parser::expression::variable_access::parse_identifier;
 use crate::parser::expression::ASTExpression;
 use crate::parser::expression::ASTType;
-use crate::parser::expression::Identifier;
 use crate::parser::statements::ASTErrorType;
 use crate::parser::StatementIterator;
 

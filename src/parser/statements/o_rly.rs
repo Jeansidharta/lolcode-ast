@@ -125,7 +125,9 @@ mod tests {
     use crate::{
         lexer::{Keywords, NumberToken, TokenType, TokenValue},
         parser::{
-            expression::{ASTExpression, ASTExpressionValue, Identifier, VariableAccess},
+            expression::{
+                identifier::Identifier, ASTExpression, ASTExpressionValue, VariableAccess,
+            },
             statements::{visible::Visible, Node},
         },
     };

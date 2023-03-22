@@ -1,9 +1,7 @@
 use crate::lexer::Token;
 use statements::parse_statement;
 
-use self::{
-    blocks::parse_block_root, expression::Identifier, statement_iterator::StatementIterator,
-};
+use self::{blocks::parse_block_root, statement_iterator::StatementIterator};
 
 pub use blocks::ASTBlock;
 

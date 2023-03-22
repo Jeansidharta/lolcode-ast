@@ -5,7 +5,8 @@ use crate::parser::StatementIterator;
 pub(crate) mod identifier;
 pub(crate) mod variable_access;
 
-pub use identifier::{ASTType, Identifier};
+pub use identifier::ASTType;
+use identifier::Identifier;
 pub use variable_access::VariableAccess;
 
 /// All binary operators. Each variant represents a different operation. The associated token is

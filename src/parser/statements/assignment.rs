@@ -1,4 +1,5 @@
 use crate::lexer::{Keywords, Token, TokenType};
+use crate::parser::ast_node::ASTStatement;
 use crate::parser::expression::ASTExpression;
 use crate::parser::statements::ASTErrorType;
 use crate::parser::statements::VariableAccess;
@@ -13,6 +14,18 @@ pub struct VariableAssignment {
     pub(crate) expression: ASTExpression,
 
     pub(crate) r_token: Token,
+}
+
+impl ASTStatement for VariableAssignment {
+    fn range(&self) -> (&crate::lexer::Position, &crate::lexer::Position) {
+        todo!()
+    }
+    fn tokens(&self) -> Vec<&Token> {
+        todo!()
+    }
+    fn similar(&self, _other: &Self) -> bool {
+        todo!()
+    }
 }
 
 // impl ASTStatement for VariableAccess {
@@ -70,7 +83,7 @@ mod tests {
 
     use crate::{
         lexer::*,
-        parser::expression::{ASTExpressionValue, Identifier},
+        parser::expression::{identifier::Identifier, ASTExpressionValue},
     };
     use pretty_assertions::assert_eq;
 

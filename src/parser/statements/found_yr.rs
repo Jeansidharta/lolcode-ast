@@ -43,7 +43,9 @@ mod tests {
     use super::*;
     use crate::{
         lexer::{Keywords, TokenType},
-        parser::expression::{ASTExpression, ASTExpressionValue, Identifier, VariableAccess},
+        parser::expression::{
+            identifier::Identifier, ASTExpression, ASTExpressionValue, VariableAccess,
+        },
     };
     use pretty_assertions::assert_eq;
 

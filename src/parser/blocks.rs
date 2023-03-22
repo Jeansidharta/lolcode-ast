@@ -192,7 +192,9 @@ pub fn parse_block_switch(statement_iterator: &mut StatementIterator) -> ASTBloc
 #[cfg(test)]
 mod tests {
     use crate::parser::{
-        expression::{ASTExpressionValue, BinaryOperation, BinaryOpt, VariableAccess},
+        expression::{
+            identifier::Identifier, ASTExpressionValue, BinaryOperation, BinaryOpt, VariableAccess,
+        },
         statements::{found_yr::FoundYr, i_has_a::IHasAInitialValue},
     };
     use std::collections::VecDeque;
@@ -202,7 +204,6 @@ mod tests {
         parser::{
             expression::ASTExpression,
             statements::{assignment::VariableAssignment, i_has_a::IHasA, visible::Visible},
-            Identifier,
         },
     };
 
