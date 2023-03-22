@@ -9,21 +9,21 @@ enum VariableAccessTokenIteratorState<'a> {
     Done,
 }
 
-pub struct VariableAccessTokenIterator<'a> {
+pub struct VariableAccessIterator<'a> {
     variable_access: &'a VariableAccess,
     state: VariableAccessTokenIteratorState<'a>,
 }
 
-impl<'a> VariableAccessTokenIterator<'a> {
+impl<'a> VariableAccessIterator<'a> {
     pub fn new(variable_access: &'a VariableAccess) -> Self {
-        VariableAccessTokenIterator {
+        VariableAccessIterator {
             variable_access,
             state: VariableAccessTokenIteratorState::Start,
         }
     }
 }
 
-impl<'a> Iterator for VariableAccessTokenIterator<'a> {
+impl<'a> Iterator for VariableAccessIterator<'a> {
     type Item = &'a Token;
 
     fn next(&mut self) -> Option<Self::Item> {

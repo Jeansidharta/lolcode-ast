@@ -7,7 +7,7 @@ use std::collections::VecDeque;
 
 use crate::lexer::{Token, TokenType};
 
-use super::variable_access_iterator::VariableAccessTokenIterator;
+use super::variable_access_iterator::VariableAccessIterator;
 
 /// A "VariableAccess" represents both a simple variable name, and a bukkit access.
 ///
@@ -45,8 +45,8 @@ impl VariableAccess {
     }
 
     /// Returns an iterator over all tokens used to construct the VariableAccess
-    pub fn tokens(&self) -> VariableAccessTokenIterator {
-        VariableAccessTokenIterator::new(self)
+    pub fn tokens(&self) -> VariableAccessIterator {
+        VariableAccessIterator::new(self)
     }
 }
 

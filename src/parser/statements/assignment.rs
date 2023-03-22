@@ -1,9 +1,69 @@
 use crate::lexer::{Keywords, Token, TokenType};
 use crate::parser::ast_node::ASTStatement;
-use crate::parser::expression::ASTExpression;
+use crate::parser::expression::variable_access_iterator::VariableAccessIterator;
+use crate::parser::expression::{ASTExpression, ASTExpressionIterator};
 use crate::parser::statements::ASTErrorType;
 use crate::parser::statements::VariableAccess;
 use crate::parser::StatementIterator;
+
+enum VariableAssignmentIteratorState<'a> {
+    Start,
+    VariableAccess(VariableAccessIterator<'a>),
+    RToken,
+    Expression(ASTExpressionIterator<'a>),
+    End,
+}
+
+/// Iterator over an VariableAssignment's tokens.
+///
+/// DOC TODO: show how to instantiate this
+pub struct VariableAssignmentIterator<'a> {
+    variable_assignment: &'a VariableAssignment,
+    state: VariableAssignmentIteratorState<'a>,
+}
+
+impl<'a> VariableAssignmentIterator<'a> {
+    pub(crate) fn new(variable_assignment: &'a VariableAssignment) -> Self {
+        Self {
+            variable_assignment,
+            state: VariableAssignmentIteratorState::Start,
+        }
+    }
+}
+
+impl<'a> Iterator for VariableAssignmentIterator<'a> {
+    type Item = &'a Token;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        match self.state {
+            VariableAssignmentIteratorState::Start => {
+                self.state = VariableAssignmentIteratorState::VariableAccess(
+                    self.variable_assignment.variable_access.tokens(),
+                );
+                self.next()
+            }
+            VariableAssignmentIteratorState::VariableAccess(ref mut iter) => {
+                iter.next().or_else(|| {
+                    self.state = VariableAssignmentIteratorState::RToken;
+                    self.next()
+                })
+            }
+            VariableAssignmentIteratorState::RToken => {
+                self.state = VariableAssignmentIteratorState::Expression(
+                    self.variable_assignment.expression.tokens(),
+                );
+                Some(&self.variable_assignment.r_token)
+            }
+            VariableAssignmentIteratorState::Expression(ref mut iter) => {
+                iter.next().or_else(|| {
+                    self.state = VariableAssignmentIteratorState::End;
+                    None
+                })
+            }
+            VariableAssignmentIteratorState::End => None,
+        }
+    }
+}
 
 /// A Variable Assignment statement
 #[derive(Debug, Clone, PartialEq)]
@@ -16,12 +76,12 @@ pub struct VariableAssignment {
     pub(crate) r_token: Token,
 }
 
-impl ASTStatement for VariableAssignment {
+impl<'a> ASTStatement<'a, VariableAssignmentIterator<'a>> for VariableAssignment {
     fn range(&self) -> (&crate::lexer::Position, &crate::lexer::Position) {
         (self.variable_access.range().0, self.expression.range().1)
     }
-    fn tokens(&self) -> Vec<&Token> {
-        todo!()
+    fn tokens(&'a self) -> VariableAssignmentIterator<'a> {
+        VariableAssignmentIterator::new(self)
     }
     fn similar(&self, _other: &Self) -> bool {
         todo!()

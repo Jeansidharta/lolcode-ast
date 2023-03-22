@@ -16,7 +16,7 @@ pub mod nary_operations;
 /// Things related to any unary operations, such as `NOT b`
 pub mod unary_operation;
 pub(crate) mod variable_access;
-mod variable_access_iterator;
+pub(crate) mod variable_access_iterator;
 
 pub use identifier::ASTType;
 use identifier::Identifier;
@@ -25,11 +25,11 @@ pub use variable_access::VariableAccess;
 use self::binary_operation::{BinaryOperationIterator, BinaryOpt};
 use self::nary_operations::{NaryOperationIterator, NaryOperationOperand};
 use self::unary_operation::UnaryOperationIterator;
-use self::variable_access_iterator::VariableAccessTokenIterator;
+use self::variable_access_iterator::VariableAccessIterator;
 
 enum ASTExpressionValueState<'a> {
     Start,
-    VariableAccess(VariableAccessTokenIterator<'a>),
+    VariableAccess(VariableAccessIterator<'a>),
     End,
 }
 
