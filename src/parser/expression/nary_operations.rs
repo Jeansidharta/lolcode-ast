@@ -48,7 +48,7 @@ impl NaryOpt {
 
 enum NaryOperationIteratorState<'a> {
     Start,
-    Operand((usize, Option<NaryOperationExpressionIterator<'a>>)),
+    Operand((usize, Option<NaryOperationOperandIterator<'a>>)),
     Mkay,
     End,
 }
@@ -104,37 +104,42 @@ impl<'a> Iterator for NaryOperationIterator<'a> {
     }
 }
 
-enum NaryOperationExpressionIteratorState<'a> {
+enum NaryOperationOperandIteratorState<'a> {
     Expression(ASTExpressionIterator<'a>),
     AnToken,
+    End,
 }
 
-struct NaryOperationExpressionIterator<'a> {
+struct NaryOperationOperandIterator<'a> {
     expression: &'a NaryOperationOperand,
-    state: NaryOperationExpressionIteratorState<'a>,
+    state: NaryOperationOperandIteratorState<'a>,
 }
 
-impl<'a> NaryOperationExpressionIterator<'a> {
+impl<'a> NaryOperationOperandIterator<'a> {
     fn new(expression: &'a NaryOperationOperand) -> Self {
         Self {
             expression,
-            state: NaryOperationExpressionIteratorState::Expression(expression.operand.tokens()),
+            state: NaryOperationOperandIteratorState::Expression(expression.operand.tokens()),
         }
     }
 }
 
-impl<'a> Iterator for NaryOperationExpressionIterator<'a> {
+impl<'a> Iterator for NaryOperationOperandIterator<'a> {
     type Item = &'a Token;
 
     fn next(&mut self) -> Option<Self::Item> {
         match self.state {
-            NaryOperationExpressionIteratorState::Expression(ref mut iter) => {
+            NaryOperationOperandIteratorState::Expression(ref mut iter) => {
                 iter.next().or_else(|| {
-                    self.state = NaryOperationExpressionIteratorState::AnToken;
+                    self.state = NaryOperationOperandIteratorState::AnToken;
                     self.next()
                 })
             }
-            NaryOperationExpressionIteratorState::AnToken => self.expression.an_token.as_ref(),
+            NaryOperationOperandIteratorState::AnToken => {
+                self.state = NaryOperationOperandIteratorState::End;
+                self.expression.an_token.as_ref()
+            }
+            NaryOperationOperandIteratorState::End => None,
         }
     }
 }
@@ -146,8 +151,8 @@ pub(crate) struct NaryOperationOperand {
 }
 
 impl NaryOperationOperand {
-    fn tokens<'a>(&'a self) -> NaryOperationExpressionIterator<'a> {
-        NaryOperationExpressionIterator::new(self)
+    fn tokens<'a>(&'a self) -> NaryOperationOperandIterator<'a> {
+        NaryOperationOperandIterator::new(self)
     }
 }
 
@@ -181,5 +186,50 @@ impl NaryOperation {
             expressions,
             mkay_token,
         }))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+
+    use super::*;
+    use crate::lexer::{Keywords, TokenType};
+    use pretty_assertions::assert_eq;
+
+    #[test]
+    fn iterator_smoosh_mkay() {
+        let mut tokens = Token::make_line(
+            vec![
+                TokenType::Keyword(Keywords::SMOOSH),
+                TokenType::Identifier("A".to_string()),
+                TokenType::Keyword(Keywords::AN),
+                TokenType::Identifier("B".to_string()),
+                TokenType::Keyword(Keywords::AN),
+                TokenType::Identifier("C".to_string()),
+                TokenType::Keyword(Keywords::AN),
+                TokenType::Identifier("D".to_string()),
+                TokenType::Keyword(Keywords::MKAY),
+            ],
+            0,
+        );
+
+        let first_token = tokens.pop_front().unwrap();
+        let variable_access = NaryOperation::parse(
+            NaryOpt::Smoosh(first_token.clone()),
+            &mut tokens.clone().into(),
+        )
+        .unwrap();
+        let mut iterator = variable_access.tokens();
+
+        assert_eq!(iterator.next(), Some(&first_token));
+        assert_eq!(iterator.next(), Some(&tokens[0]));
+        assert_eq!(iterator.next(), Some(&tokens[1]));
+        assert_eq!(iterator.next(), Some(&tokens[2]));
+        assert_eq!(iterator.next(), Some(&tokens[3]));
+        assert_eq!(iterator.next(), Some(&tokens[4]));
+        assert_eq!(iterator.next(), Some(&tokens[5]));
+        assert_eq!(iterator.next(), Some(&tokens[6]));
+        assert_eq!(iterator.next(), Some(&tokens[7]));
+        assert_eq!(iterator.next(), None);
     }
 }

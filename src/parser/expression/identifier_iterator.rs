@@ -55,10 +55,7 @@ mod test {
     #[test]
     fn no_srs() {
         let name = Token::from(TokenType::Identifier("VAR".to_string()));
-        let identifier = Identifier {
-            srs: None,
-            name: name.clone(),
-        };
+        let identifier = Identifier::parse(name.clone(), &mut [].into()).unwrap();
         let mut iterator = identifier.tokens();
 
         assert_eq!(iterator.next(), Some(&name));
@@ -67,17 +64,23 @@ mod test {
 
     #[test]
     fn with_srs() {
-        let srs = Token::from(TokenType::Keyword(Keywords::SRS));
-        let name = Token::from(TokenType::Identifier("VAR".to_string()));
+        let mut tokens = Token::make_line(
+            vec![
+                TokenType::Keyword(Keywords::SRS),
+                TokenType::Identifier("VAR".to_string()),
+            ],
+            0,
+        );
 
-        let identifier = Identifier {
-            srs: Some(srs.clone()),
-            name: name.clone(),
-        };
+        let first_token = tokens.pop_front().unwrap();
+
+        let identifier =
+            Identifier::parse(first_token.clone(), &mut tokens.clone().into()).unwrap();
+
         let mut iterator = identifier.tokens();
 
-        assert_eq!(iterator.next(), Some(&srs));
-        assert_eq!(iterator.next(), Some(&name));
+        assert_eq!(iterator.next(), Some(&first_token));
+        assert_eq!(iterator.next(), Some(&tokens[0]));
         assert_eq!(iterator.next(), None);
     }
 }

@@ -108,28 +108,17 @@ impl<'a> Iterator for VariableAccessIterator<'a> {
 
 #[cfg(test)]
 mod test {
-
     use pretty_assertions::assert_eq;
-    use std::collections::VecDeque;
 
-    use crate::{
-        lexer::{Keywords, TokenType},
-        parser::expression::identifier::Identifier,
-    };
+    use crate::lexer::{Keywords, TokenType};
 
     use super::*;
 
     #[test]
     fn no_srs_no_access() {
         let name = Token::from(TokenType::Identifier("VAR".to_string()));
-        let identifier = VariableAccess {
-            identifier: Identifier {
-                srs: None,
-                name: name.clone(),
-            },
-            accesses: VecDeque::new(),
-        };
-        let mut iterator = identifier.tokens();
+        let variable_access = VariableAccess::parse(name.clone(), &mut [].into()).unwrap();
+        let mut iterator = variable_access.tokens();
 
         assert_eq!(iterator.next(), Some(&name));
         assert_eq!(iterator.next(), None);
@@ -137,7 +126,7 @@ mod test {
 
     #[test]
     fn no_srs_two_accesses() {
-        let tokens = Token::make_line(
+        let mut tokens = Token::make_line(
             vec![
                 TokenType::Identifier("Var".to_string()),
                 TokenType::BukkitSlotAccess,
@@ -148,42 +137,22 @@ mod test {
             0,
         );
 
-        let identifier = VariableAccess {
-            identifier: Identifier {
-                srs: None,
-                name: tokens[0].clone(),
-            },
-            accesses: VecDeque::from([
-                VariableAccessSlot {
-                    slot_access_token: tokens[1].clone(),
-                    identifier: Identifier {
-                        srs: None,
-                        name: tokens[2].clone(),
-                    },
-                },
-                VariableAccessSlot {
-                    slot_access_token: tokens[3].clone(),
-                    identifier: Identifier {
-                        srs: None,
-                        name: tokens[4].clone(),
-                    },
-                },
-            ]),
-        };
+        let first_token = tokens.pop_front().unwrap();
+        let variable_access =
+            VariableAccess::parse(first_token.clone(), &mut tokens.clone().into()).unwrap();
+        let mut iterator = variable_access.tokens();
 
-        let mut iterator = identifier.tokens();
-
+        assert_eq!(iterator.next(), Some(&first_token));
         assert_eq!(iterator.next(), Some(&tokens[0]));
         assert_eq!(iterator.next(), Some(&tokens[1]));
         assert_eq!(iterator.next(), Some(&tokens[2]));
         assert_eq!(iterator.next(), Some(&tokens[3]));
-        assert_eq!(iterator.next(), Some(&tokens[4]));
         assert_eq!(iterator.next(), None);
     }
 
     #[test]
     fn some_srs_two_accesses() {
-        let tokens = Token::make_line(
+        let mut tokens = Token::make_line(
             vec![
                 TokenType::Keyword(Keywords::SRS),
                 TokenType::Identifier("Var".to_string()),
@@ -196,38 +165,18 @@ mod test {
             0,
         );
 
-        let identifier = VariableAccess {
-            identifier: Identifier {
-                srs: Some(tokens[0].clone()),
-                name: tokens[1].clone(),
-            },
-            accesses: VecDeque::from([
-                VariableAccessSlot {
-                    slot_access_token: tokens[2].clone(),
-                    identifier: Identifier {
-                        srs: Some(tokens[3].clone()),
-                        name: tokens[4].clone(),
-                    },
-                },
-                VariableAccessSlot {
-                    slot_access_token: tokens[5].clone(),
-                    identifier: Identifier {
-                        srs: None,
-                        name: tokens[6].clone(),
-                    },
-                },
-            ]),
-        };
+        let first_token = tokens.pop_front().unwrap();
+        let variable_access =
+            VariableAccess::parse(first_token.clone(), &mut tokens.clone().into()).unwrap();
+        let mut iterator = variable_access.tokens();
 
-        let mut iterator = identifier.tokens();
-
+        assert_eq!(iterator.next(), Some(&first_token));
         assert_eq!(iterator.next(), Some(&tokens[0]));
         assert_eq!(iterator.next(), Some(&tokens[1]));
         assert_eq!(iterator.next(), Some(&tokens[2]));
         assert_eq!(iterator.next(), Some(&tokens[3]));
         assert_eq!(iterator.next(), Some(&tokens[4]));
         assert_eq!(iterator.next(), Some(&tokens[5]));
-        assert_eq!(iterator.next(), Some(&tokens[6]));
         assert_eq!(iterator.next(), None);
     }
 }

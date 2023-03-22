@@ -1,6 +1,5 @@
 use crate::lexer::{Keywords, Token, TokenType};
 use crate::parser::expression::identifier::Identifier;
-use crate::parser::expression::variable_access::parse_identifier;
 use crate::parser::expression::ASTExpression;
 use crate::parser::expression::ASTType;
 use crate::parser::statements::ASTErrorType;
@@ -51,7 +50,7 @@ impl IHasA {
                     token_type: TokenType::Identifier(_) | TokenType::Keyword(Keywords::SRS),
                     ..
                 },
-            ) => parse_identifier(token, tokens)?,
+            ) => Identifier::parse(token, tokens)?,
             Some(token) => return Err(IHasAError::InvalidIdentifier(token).into()),
         };
 

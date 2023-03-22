@@ -360,3 +360,115 @@ impl ASTExpression {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::lexer::TokenValue;
+
+    use super::*;
+    use pretty_assertions::assert_eq;
+
+    #[test]
+    fn iterator_simple() {
+        let mut tokens = Token::make_line(
+            vec![
+                TokenType::Keyword(Keywords::SUM_OF),
+                TokenType::Identifier("A".to_string()),
+                TokenType::Keyword(Keywords::AN),
+                TokenType::Identifier("B".to_string()),
+            ],
+            0,
+        );
+
+        let first_token = tokens.pop_front().unwrap();
+        let expression =
+            ASTExpression::parse(first_token.clone(), &mut tokens.clone().into()).unwrap();
+        let mut iter = expression.tokens();
+
+        assert_eq!(iter.next(), Some(&first_token));
+        assert_eq!(iter.next(), Some(&tokens[0]));
+        assert_eq!(iter.next(), Some(&tokens[1]));
+        assert_eq!(iter.next(), Some(&tokens[2]));
+        assert_eq!(iter.next(), None);
+    }
+
+    #[test]
+    fn iterator_unary_binary_nary() {
+        let mut tokens = Token::make_line(
+            vec![
+                TokenType::Keyword(Keywords::NOT),
+                TokenType::Keyword(Keywords::BOTH_OF),
+                TokenType::Keyword(Keywords::SMOOSH),
+                TokenType::Identifier("A".to_string()),
+                TokenType::Keyword(Keywords::AN),
+                TokenType::Identifier("B".to_string()),
+                TokenType::Keyword(Keywords::AN),
+                TokenType::Identifier("C".to_string()),
+                TokenType::Keyword(Keywords::MKAY),
+                TokenType::Keyword(Keywords::AN),
+                TokenType::Identifier("D".to_string()),
+            ],
+            0,
+        );
+
+        let first_token = tokens.pop_front().unwrap();
+        let expression =
+            ASTExpression::parse(first_token.clone(), &mut tokens.clone().into()).unwrap();
+        let mut iter = expression.tokens();
+
+        assert_eq!(iter.next(), Some(&first_token));
+        assert_eq!(iter.next(), Some(&tokens[0]));
+        assert_eq!(iter.next(), Some(&tokens[1]));
+        assert_eq!(iter.next(), Some(&tokens[2]));
+        assert_eq!(iter.next(), Some(&tokens[3]));
+        assert_eq!(iter.next(), Some(&tokens[4]));
+        assert_eq!(iter.next(), Some(&tokens[5]));
+        assert_eq!(iter.next(), Some(&tokens[6]));
+        assert_eq!(iter.next(), Some(&tokens[7]));
+        assert_eq!(iter.next(), Some(&tokens[8]));
+        assert_eq!(iter.next(), Some(&tokens[9]));
+        assert_eq!(iter.next(), None);
+    }
+
+    #[test]
+    fn iterator_nary_access_value() {
+        let mut tokens = Token::make_line(
+            vec![
+                TokenType::Keyword(Keywords::ALL_OF),
+                TokenType::Keyword(Keywords::SRS),
+                TokenType::Identifier("A".to_string()),
+                TokenType::Keyword(Keywords::AN),
+                TokenType::Identifier("B".to_string()),
+                TokenType::BukkitSlotAccess,
+                TokenType::Identifier("C".to_string()),
+                TokenType::BukkitSlotAccess,
+                TokenType::Keyword(Keywords::SRS),
+                TokenType::Identifier("D".to_string()),
+                TokenType::Keyword(Keywords::AN),
+                TokenType::Value(TokenValue::String("VALUE".to_string())),
+                TokenType::Keyword(Keywords::MKAY),
+            ],
+            0,
+        );
+
+        let first_token = tokens.pop_front().unwrap();
+        let expression =
+            ASTExpression::parse(first_token.clone(), &mut tokens.clone().into()).unwrap();
+        let mut iter = expression.tokens();
+
+        assert_eq!(iter.next(), Some(&first_token));
+        assert_eq!(iter.next(), Some(&tokens[0]));
+        assert_eq!(iter.next(), Some(&tokens[1]));
+        assert_eq!(iter.next(), Some(&tokens[2]));
+        assert_eq!(iter.next(), Some(&tokens[3]));
+        assert_eq!(iter.next(), Some(&tokens[4]));
+        assert_eq!(iter.next(), Some(&tokens[5]));
+        assert_eq!(iter.next(), Some(&tokens[6]));
+        assert_eq!(iter.next(), Some(&tokens[7]));
+        assert_eq!(iter.next(), Some(&tokens[8]));
+        assert_eq!(iter.next(), Some(&tokens[9]));
+        assert_eq!(iter.next(), Some(&tokens[10]));
+        assert_eq!(iter.next(), Some(&tokens[11]));
+        assert_eq!(iter.next(), None);
+    }
+}

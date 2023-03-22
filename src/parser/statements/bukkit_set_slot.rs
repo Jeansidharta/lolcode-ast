@@ -1,6 +1,5 @@
 use crate::lexer::{Keywords, Token, TokenType};
 use crate::parser::expression::identifier::Identifier;
-use crate::parser::expression::variable_access::parse_identifier;
 use crate::parser::expression::ASTExpression;
 use crate::parser::statements::ASTErrorType;
 use crate::parser::statements::VariableAccess;
@@ -37,7 +36,7 @@ impl BukkitSetSlot {
         };
 
         let slot_name = match tokens.next() {
-            Some(initial_token) => parse_identifier(initial_token, tokens)?,
+            Some(initial_token) => Identifier::parse(initial_token, tokens)?,
             None => {
                 return Err(ASTErrorType::VariableAssignment(
                     VariableAssignmentError::ExpectedValue(has_a_token),

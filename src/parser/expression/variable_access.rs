@@ -66,7 +66,7 @@ impl VariableAccess {
         first_token: Token,
         tokens: &mut StatementIterator,
     ) -> Result<VariableAccess, ASTErrorType> {
-        let first_ident = parse_identifier(first_token, tokens)?;
+        let first_ident = Identifier::parse(first_token, tokens)?;
 
         let mut accesses = VecDeque::new();
         while let Some(slot_access_token) =
@@ -75,7 +75,7 @@ impl VariableAccess {
             match tokens.next() {
                 Some(token) => accesses.push_back(VariableAccessSlot {
                     slot_access_token,
-                    identifier: parse_identifier(token, tokens)?,
+                    identifier: Identifier::parse(token, tokens)?,
                 }),
                 None => return Err(ASTErrorType::MissingToken(slot_access_token)),
             }
@@ -92,31 +92,5 @@ impl VariableAccess {
             token.token_type,
             TokenType::Identifier(_) | TokenType::Keyword(Keywords::SRS)
         )
-    }
-}
-
-pub(crate) fn parse_identifier(
-    first_token: Token,
-    tokens: &mut StatementIterator,
-) -> Result<Identifier, ASTErrorType> {
-    match first_token.token_type {
-        TokenType::Identifier(_) => Ok(Identifier {
-            name: first_token,
-            srs: None,
-        }),
-        TokenType::Keyword(Keywords::SRS) => match tokens.next() {
-            None => Err(ASTErrorType::MissingToken(first_token)),
-            Some(
-                name_token @ Token {
-                    token_type: TokenType::Identifier(_),
-                    ..
-                },
-            ) => Ok(Identifier {
-                name: name_token,
-                srs: Some(first_token),
-            }),
-            Some(token) => Err(ASTErrorType::UnexpectedToken(token)),
-        },
-        _ => Err(ASTErrorType::UnexpectedToken(first_token)),
     }
 }
