@@ -108,11 +108,9 @@ impl<'a> Iterator for VariableAccessIterator<'a> {
 
 #[cfg(test)]
 mod test {
-    use pretty_assertions::assert_eq;
-
-    use crate::lexer::{Keywords, TokenType};
-
     use super::*;
+    use crate::lexer::{Keywords, TokenType};
+    use pretty_assertions::assert_eq;
 
     #[test]
     fn no_srs_no_access() {
