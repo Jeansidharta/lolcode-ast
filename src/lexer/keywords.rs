@@ -2,7 +2,7 @@
 
 use std::fmt::Debug;
 
-use macros_lib::{IterableEnum, ToStringSlice};
+use lolcode_ast_derive::{IterableEnum, ToStringSlice};
 
 /// The enum with all LOLCODE keywords
 ///
