@@ -10,10 +10,8 @@ use crate::parser::expression::{parse_expression, ASTExpression};
 #[derive(Debug, Clone, PartialEq)]
 pub struct Visible {
     pub(crate) visible_token: Token,
-
-    pub expressions: VecDeque<ASTExpression>,
-
-    pub exclamation_mark: Option<Token>,
+    pub(crate) expressions: VecDeque<ASTExpression>,
+    pub(crate) exclamation_mark: Option<Token>,
 }
 
 impl Visible {

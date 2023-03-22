@@ -8,19 +8,19 @@ use crate::lexer::{Keywords, Token, TokenType};
 use crate::parser::blocks::{parse_block_if, ASTBlock};
 
 #[derive(Clone, PartialEq, Debug)]
-pub struct YaRly {
+pub(crate) struct YaRly {
     pub(crate) ya_rly_token: Token,
     pub(crate) block: ASTBlock,
 }
 
 #[derive(Clone, PartialEq, Debug)]
-pub struct NoWai {
+pub(crate) struct NoWai {
     pub(crate) no_wai_token: Token,
     pub(crate) block: ASTBlock,
 }
 
 #[derive(Clone, PartialEq, Debug)]
-pub struct Mebbe {
+pub(crate) struct Mebbe {
     pub(crate) mebbe_token: Token,
     pub(crate) condition: ASTExpression,
     pub(crate) block: ASTBlock,
@@ -31,13 +31,13 @@ pub struct Mebbe {
 pub struct ORly {
     o_rly_token: Token,
     /// The statements that must be executed if the given expression is true.
-    pub if_true: Option<YaRly>,
+    pub(crate) if_true: Option<YaRly>,
     /// The statements that must be executed if the given expression is false, and no mebbes were
     /// truthful
-    pub if_false: Option<NoWai>,
+    pub(crate) if_false: Option<NoWai>,
     /// The statements that must be executed if the given expression false, but the mebbe
     /// expression is true
-    pub mebbes: VecDeque<Mebbe>,
+    pub(crate) mebbes: VecDeque<Mebbe>,
 }
 
 /// Errors that can only happen when parsing a `O RLY?` statement

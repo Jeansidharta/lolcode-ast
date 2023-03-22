@@ -9,14 +9,14 @@ use crate::parser::expression::{parse_expression, ASTExpression};
 use super::o_rly::ORlyError;
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct WtfOmg {
+pub(crate) struct WtfOmg {
     pub(crate) omg_token: Token,
     pub(crate) expression: ASTExpression,
     pub(crate) block: ASTBlock,
 }
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct WtfOmgWtf {
+pub(crate) struct WtfOmgWtf {
     pub(crate) omg_wtf_token: Token,
     pub(crate) block: ASTBlock,
 }
@@ -26,9 +26,9 @@ pub struct WtfOmgWtf {
 pub struct Wtf {
     pub(crate) wtf_token: Token,
     /// The cases to test the given expression againsT
-    pub omg: VecDeque<WtfOmg>,
+    pub(crate) omg: VecDeque<WtfOmg>,
     /// If no `OMG` matches, use the `OMGWTF`
-    pub omg_wtf: Option<WtfOmgWtf>,
+    pub(crate) omg_wtf: Option<WtfOmgWtf>,
 }
 
 impl Wtf {

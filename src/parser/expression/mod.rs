@@ -8,23 +8,75 @@ pub(crate) mod variable_access;
 pub use identifier::{ASTType, Identifier};
 pub use variable_access::VariableAccess;
 
+/// All binary operators. Each variant represents a different operation. The associated token is
+/// a keyword token that generated the operator.
 #[derive(Debug, PartialEq, Clone)]
 pub enum BinaryOpt {
+    /// Checks if left or right are true (left || right)
+    /// ```LOLCode
+    /// EITHER OF left AN right
+    /// ```
     EitherOf(Token),
+    /// A XOR between the left operant and the right operand. Will be true if left is different.
+    /// than right.
+    /// ```LOLCode
+    /// WON OF left AN right
+    /// ```
     WonOf(Token),
+    /// Adds both operands as a number (left + right).
+    /// ```LOLCode
+    /// SUM OF left AN right
+    /// ```
     SumOf(Token),
+    /// Subtract right from left (left - right).
+    /// ```LOLCode
+    /// DIFF OF left AN right
+    /// ```
     DiffOf(Token),
+    /// Multiplies left and right (left * right).
+    /// ```LOLCode
+    /// DIFF OF left AN right
+    /// ```
     ProduktOf(Token),
+    /// Divides left and right (left / right).
+    /// ```LOLCode
+    /// QUOSHUNT OF left AN right
+    /// ```
     QuoshuntOf(Token),
+    /// Remainder of a division between left and right (left % right).
+    /// ```LOLCode
+    /// MOD OF left AN right
+    /// ```
     ModOf(Token),
+    /// Checks if left is bigger than right (left > right).
+    /// ```LOLCode
+    /// BIGGR OF left AN right
+    /// ```
     BiggrOf(Token),
+    /// Checks of left is smaller than right (left < right).
+    /// ```LOLCode
+    /// SMALLR OF left AN right
+    /// ```
     SmallrOf(Token),
+    /// Checks if left is equal to right (left == right)
+    /// ```LOLCode
+    /// BOTH SAME left AN right
+    /// ```
     BothSaem(Token),
+    /// Checks if left and right are both true (left && right)
+    /// ```LOLCode
+    /// BOTH OF left AN right
+    /// ```
     BothOf(Token),
+    /// Checks if left is different from right (left != right)
+    /// ```LOLCode
+    /// DIFFRINT left AN right
+    /// ```
     Diffrint(Token),
 }
 
 impl BinaryOpt {
+    /// Gets a reference to the token inside the operator
     pub fn token(&self) -> &Token {
         match self {
             BinaryOpt::EitherOf(token) => token,
@@ -42,6 +94,7 @@ impl BinaryOpt {
         }
     }
 
+    /// Extracts the token from inside the operator, consuming the operator
     pub fn into_token(self) -> Token {
         match self {
             BinaryOpt::EitherOf(token) => token,
@@ -60,18 +113,26 @@ impl BinaryOpt {
     }
 }
 
+/// All unary operators. Each variant represents a different operation. The associated token is
+/// a keyword token that generated the operator.
 #[derive(Debug, PartialEq, Clone)]
 pub enum UnaryOpt {
+    /// Converts the operand to a boolean, and then negates it.
+    /// ```LOLCode
+    /// NOT operand
+    /// ```
     Not(Token),
 }
 
 impl UnaryOpt {
+    /// Extracts the token from inside the operator, consuming the operator
     pub fn into_token(self) -> Token {
         match self {
             UnaryOpt::Not(token) => token,
         }
     }
 
+    /// Gets a reference to the token inside the operator
     pub fn token(&self) -> &Token {
         match self {
             UnaryOpt::Not(token) => token,
@@ -79,14 +140,29 @@ impl UnaryOpt {
     }
 }
 
+/// All operators that can have any number of operands. Each variant represents a different operation. The associated token is
+/// a keyword token that generated the operator.
 #[derive(Debug, PartialEq, Clone)]
 pub enum NaryOpt {
+    /// Checks if all operands are true. (A && B && C && ...)
+    /// ```LOLCode
+    /// ALL OF A AN B AN C MKAY
+    /// ```
     AllOf(Token),
+    /// Concatenates all string operands
+    /// ```LOLCode
+    /// SMOOSH A AN B AN C MKAY
+    /// ```
     Smoosh(Token),
+    /// Checks if any operands are true. (A || B || C || ...)
+    /// ```LOLCode
+    /// ANY OF A AN B AN C MKAY
+    /// ```
     AnyOf(Token),
 }
 
 impl NaryOpt {
+    /// Extracts the token from inside the operator, consuming the operator
     pub fn into_token(self) -> Token {
         match self {
             NaryOpt::AllOf(token) => token,
@@ -95,6 +171,7 @@ impl NaryOpt {
         }
     }
 
+    /// Gets a reference to the token inside the operator
     pub fn token(&self) -> &Token {
         match self {
             NaryOpt::AllOf(token) => token,
@@ -104,13 +181,18 @@ impl NaryOpt {
     }
 }
 
+/// The possible values when an expression is a value, not an operation.
 #[derive(Debug, PartialEq, Clone)]
 pub enum ASTExpressionValue {
+    /// The expression is a variable access. It can be either just referencing any variable, or
+    /// accessing a bukkit's internal values.
     VariableAccess(VariableAccess),
+    /// The expression is just one of the literal values, such as numbers, strings or booleans.
     LiteralValue(Token),
 }
 
 impl ASTExpressionValue {
+    /// Gets the range of the entire expression
     pub fn range(&self) -> (&Position, &Position) {
         match self {
             ASTExpressionValue::VariableAccess(variable_access) => variable_access.range(),
@@ -135,6 +217,7 @@ impl TryFrom<Token> for ASTExpressionValue {
     }
 }
 
+/// A operations with exactly two operands
 #[derive(Debug, PartialEq, Clone)]
 pub struct BinaryOperation {
     pub(crate) left: Box<ASTExpression>,
@@ -143,12 +226,14 @@ pub struct BinaryOperation {
     pub(crate) an_token: Option<Token>,
 }
 
+/// A operation with exactly one operand
 #[derive(Debug, PartialEq, Clone)]
 pub struct UnaryOperation {
     pub(crate) operator: UnaryOpt,
     pub(crate) expression: Box<ASTExpression>,
 }
 
+/// A operation with any number of operands
 #[derive(Debug, PartialEq, Clone)]
 pub struct NaryOperation {
     pub(crate) operator: NaryOpt,
@@ -159,9 +244,13 @@ pub struct NaryOperation {
 /// A LOLCODE expression.
 #[derive(Debug, PartialEq, Clone)]
 pub enum ASTExpression {
+    /// The expression is an operation with exactly two operands
     BinaryOperation(BinaryOperation),
+    /// The expression is an operation with exactly one operands
     UnaryOperation(UnaryOperation),
+    /// The expression is an operation with any number of operands
     NaryOperation(NaryOperation),
+    /// A operation with exactly any number of operands
     Value(ASTExpressionValue),
 }
 
@@ -184,6 +273,7 @@ impl From<NaryOperation> for ASTExpression {
 }
 
 impl ASTExpression {
+    /// Gets the range (start position and end position) of the entire expression
     pub fn range(&self) -> (&Position, &Position) {
         match self {
             ASTExpression::BinaryOperation(BinaryOperation {

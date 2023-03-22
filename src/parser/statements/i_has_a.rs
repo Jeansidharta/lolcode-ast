@@ -38,7 +38,7 @@ pub struct IHasA {
 }
 
 impl IHasA {
-    pub fn parse(
+    pub(crate) fn parse(
         first_token: Token,
         tokens: &mut StatementIterator,
     ) -> Result<IHasA, ASTErrorType> {

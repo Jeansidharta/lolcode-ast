@@ -4,6 +4,12 @@ use crate::parser::expression::VariableAccess;
 use crate::parser::statements::ASTErrorType;
 use crate::parser::StatementIterator;
 
+/// Represents a `GIMMEH` statement. It gets user input from standard input
+///
+/// ```LOLCode
+/// I HAS A var
+/// GIMMEH var
+/// ```
 #[derive(Debug, PartialEq, Clone)]
 pub struct Gimmeh {
     gimmeh_token: Token,

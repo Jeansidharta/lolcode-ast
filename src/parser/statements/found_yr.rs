@@ -4,6 +4,15 @@ use crate::parser::expression::ASTExpression;
 use crate::parser::statements::ASTErrorType;
 use crate::parser::StatementIterator;
 
+/// Represents a `FOUND YR` statement. This statement returns a value from a function.
+/// ```LOLCode
+/// HOW IZ I is_even YR num
+///     MOD num AN 2, O RLY?
+///         YA RLY, FOUND YR "Odd"
+///         NO WAI, FOUND YR "Even"
+///     OIC
+/// IF U SAY SO
+/// ```
 #[derive(Debug, PartialEq, Clone)]
 pub struct FoundYr {
     pub(crate) found_yr_token: Token,

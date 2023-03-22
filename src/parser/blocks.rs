@@ -45,7 +45,7 @@ impl<'a> ASTBlockErrorIterator<'a> {
 }
 
 impl Node {
-    pub fn get_inner_block(&self) -> Option<Vec<&ASTBlock>> {
+    pub(crate) fn get_inner_block(&self) -> Option<Vec<&ASTBlock>> {
         match self {
             Node::Wtf(Wtf { omg, omg_wtf, .. }) => {
                 let mut vec: Vec<&ASTBlock> =
@@ -114,6 +114,7 @@ impl<'a> Iterator for ASTBlockErrorIterator<'a> {
 }
 
 impl ASTBlock {
+    /// Iterates over any errors inside the block
     pub fn iter_errors(&self) -> impl Iterator + '_ {
         ASTBlockErrorIterator::new(self)
     }
