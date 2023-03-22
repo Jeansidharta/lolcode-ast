@@ -7,7 +7,20 @@ use std::collections::VecDeque;
 
 use crate::lexer::{Token, TokenType};
 
-use super::variable_access_iterator::VariableAccessIterator;
+use super::variable_access_iterator::{VariableAccessIterator, VariableAccessSlotIterator};
+
+#[derive(Debug, PartialEq, Clone)]
+pub struct VariableAccessSlot {
+    pub(crate) slot_access_token: Token,
+    pub(crate) identifier: Identifier,
+}
+
+impl VariableAccessSlot {
+    /// Returns an iterator over all tokens used to construct the VariableAccess
+    pub fn tokens(&self) -> VariableAccessSlotIterator {
+        VariableAccessSlotIterator::new(self)
+    }
+}
 
 /// A "VariableAccess" represents both a simple variable name, and a bukkit access.
 ///
@@ -22,14 +35,14 @@ pub struct VariableAccess {
     pub(crate) identifier: Identifier,
     /// The other identifiers used after the
     /// BukkitSlotAccess
-    pub(crate) accesses: VecDeque<Identifier>,
+    pub(crate) accesses: VecDeque<VariableAccessSlot>,
 }
 
 impl VariableAccess {
     pub(crate) fn last_token(mut self) -> Token {
         self.accesses
             .pop_back()
-            .map(|ident| ident.name)
+            .map(|VariableAccessSlot { identifier, .. }| identifier.name)
             .unwrap_or_else(|| self.identifier.name)
     }
 
@@ -38,7 +51,7 @@ impl VariableAccess {
         let identifier_range = self.identifier.range();
         let mut last_position = identifier_range.1;
         match self.accesses.back() {
-            Some(access) => last_position = access.range().1,
+            Some(VariableAccessSlot { identifier, .. }) => last_position = identifier.range().1,
             None => {}
         };
         (identifier_range.0, last_position)
@@ -47,6 +60,38 @@ impl VariableAccess {
     /// Returns an iterator over all tokens used to construct the VariableAccess
     pub fn tokens(&self) -> VariableAccessIterator {
         VariableAccessIterator::new(self)
+    }
+
+    pub(crate) fn parse(
+        first_token: Token,
+        tokens: &mut StatementIterator,
+    ) -> Result<VariableAccess, ASTErrorType> {
+        let first_ident = parse_identifier(first_token, tokens)?;
+
+        let mut accesses = VecDeque::new();
+        while let Some(slot_access_token) =
+            tokens.next_if(|t| matches!(t.token_type, TokenType::BukkitSlotAccess))
+        {
+            match tokens.next() {
+                Some(token) => accesses.push_back(VariableAccessSlot {
+                    slot_access_token,
+                    identifier: parse_identifier(token, tokens)?,
+                }),
+                None => return Err(ASTErrorType::MissingToken(slot_access_token)),
+            }
+        }
+
+        Ok(VariableAccess {
+            identifier: first_ident,
+            accesses,
+        })
+    }
+
+    pub(crate) fn is_valid(token: &Token) -> bool {
+        matches!(
+            token.token_type,
+            TokenType::Identifier(_) | TokenType::Keyword(Keywords::SRS)
+        )
     }
 }
 
@@ -74,33 +119,4 @@ pub(crate) fn parse_identifier(
         },
         _ => Err(ASTErrorType::UnexpectedToken(first_token)),
     }
-}
-
-pub(crate) fn parse_variable_access(
-    first_token: Token,
-    tokens: &mut StatementIterator,
-) -> Result<VariableAccess, ASTErrorType> {
-    let first_ident = parse_identifier(first_token, tokens)?;
-
-    let mut accesses = VecDeque::new();
-    while let Some(slot_acceess_token) =
-        tokens.next_if(|t| matches!(t.token_type, TokenType::BukkitSlotAccess))
-    {
-        match tokens.next() {
-            Some(token) => accesses.push_back(parse_identifier(token, tokens)?),
-            None => return Err(ASTErrorType::MissingToken(slot_acceess_token)),
-        }
-    }
-
-    Ok(VariableAccess {
-        identifier: first_ident,
-        accesses,
-    })
-}
-
-pub(crate) fn is_valid_variable_access(token: &Token) -> bool {
-    matches!(
-        token.token_type,
-        TokenType::Identifier(_) | TokenType::Keyword(Keywords::SRS)
-    )
 }

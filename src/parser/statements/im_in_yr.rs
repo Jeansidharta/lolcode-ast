@@ -1,6 +1,5 @@
 use crate::lexer::{Keywords, Token, TokenType};
 use crate::parser::blocks::parse_block_loop;
-use crate::parser::expression::variable_access::parse_variable_access;
 use crate::parser::expression::VariableAccess;
 use crate::parser::statements::ASTErrorType;
 use crate::parser::statements::ASTExpression;
@@ -262,7 +261,7 @@ fn parse_iteration_operation(
 
     let operand = match tokens.next() {
         None => return Err(ImInYrError::MissingOperand(operation.into()).into()),
-        Some(token) => parse_variable_access(token, tokens)?,
+        Some(token) => VariableAccess::parse(token, tokens)?,
     };
 
     Ok(Some(LoopIterationOperation { operation, operand }))

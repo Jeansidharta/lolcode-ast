@@ -1,5 +1,4 @@
 use crate::lexer::Token;
-use crate::parser::expression::variable_access::parse_variable_access;
 use crate::parser::expression::VariableAccess;
 use crate::parser::statements::ASTErrorType;
 use crate::parser::StatementIterator;
@@ -23,7 +22,7 @@ impl Gimmeh {
     ) -> Result<Gimmeh, ASTErrorType> {
         match tokens.next() {
             Some(token) => Ok(Gimmeh {
-                variable_access: parse_variable_access(token, tokens)?,
+                variable_access: VariableAccess::parse(token, tokens)?,
                 gimmeh_token: first_token,
             }),
             None => Err(ASTErrorType::MissingToken(first_token)),

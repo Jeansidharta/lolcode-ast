@@ -1,4 +1,3 @@
-use crate::parser::expression::variable_access::parse_variable_access;
 use crate::parser::statements::ASTErrorType;
 use crate::parser::statements::VariableAccess;
 use crate::parser::StatementIterator;
@@ -46,7 +45,7 @@ impl IIz {
     ) -> Result<IIz, ASTErrorType> {
         let name = match tokens.next() {
             None => return Err(ASTErrorType::IIz(IIzError::MissingName(first_token))),
-            Some(token) => parse_variable_access(token, tokens)?,
+            Some(token) => VariableAccess::parse(token, tokens)?,
         };
 
         let mut arguments = VecDeque::new();

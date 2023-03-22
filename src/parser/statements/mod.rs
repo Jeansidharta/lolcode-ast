@@ -14,7 +14,6 @@ use self::visible::Visible;
 use self::wtf::Wtf;
 use crate::parser::error::ASTErrorType;
 
-use super::expression::variable_access::{is_valid_variable_access, parse_variable_access};
 use super::expression::{ASTExpression, ASTExpressionValue};
 use crate::lexer::{Keywords, Token, TokenType};
 use crate::parser::expression::VariableAccess;
@@ -204,8 +203,8 @@ pub(crate) fn parse_statement(
     first_token: Token,
     tokens: &mut StatementIterator,
 ) -> Result<Node, ASTErrorType> {
-    if is_valid_variable_access(&first_token) {
-        let variable_access = parse_variable_access(first_token, tokens)?;
+    if VariableAccess::is_valid(&first_token) {
+        let variable_access = VariableAccess::parse(first_token, tokens)?;
         return match tokens.peek().map(|t| &t.token_type) {
             None => Ok(Node::Expression(ASTExpression::Value(
                 ASTExpressionValue::VariableAccess(variable_access),

@@ -295,7 +295,7 @@ impl ASTExpression {
     ) -> Result<ASTExpression, ASTErrorType> {
         match first_token.token_type {
             TokenType::Identifier(_) | TokenType::Keyword(Keywords::SRS) => {
-                variable_access::parse_variable_access(first_token, tokens)
+                variable_access::VariableAccess::parse(first_token, tokens)
                     .map(|v| ASTExpression::Value(v.into()))
             }
             TokenType::Value(_) => Ok(ASTExpression::Value(ASTExpressionValue::LiteralValue(

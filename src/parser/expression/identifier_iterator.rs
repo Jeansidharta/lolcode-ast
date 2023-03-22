@@ -44,3 +44,40 @@ impl<'a> Iterator for IdentifierTokensIterator<'a> {
         }
     }
 }
+
+#[cfg(test)]
+mod test {
+    use crate::lexer::{Keywords, TokenType};
+    use pretty_assertions::assert_eq;
+
+    use super::*;
+
+    #[test]
+    fn no_srs() {
+        let name = Token::from(TokenType::Identifier("VAR".to_string()));
+        let identifier = Identifier {
+            srs: None,
+            name: name.clone(),
+        };
+        let mut iterator = identifier.tokens();
+
+        assert_eq!(iterator.next(), Some(&name));
+        assert_eq!(iterator.next(), None);
+    }
+
+    #[test]
+    fn with_srs() {
+        let srs = Token::from(TokenType::Keyword(Keywords::SRS));
+        let name = Token::from(TokenType::Identifier("VAR".to_string()));
+
+        let identifier = Identifier {
+            srs: Some(srs.clone()),
+            name: name.clone(),
+        };
+        let mut iterator = identifier.tokens();
+
+        assert_eq!(iterator.next(), Some(&srs));
+        assert_eq!(iterator.next(), Some(&name));
+        assert_eq!(iterator.next(), None);
+    }
+}
