@@ -1,6 +1,9 @@
-use crate::parser::Token;
+use crate::{
+    lexer::{Keywords, TokenType},
+    parser::{error::ASTErrorType, statement_iterator::StatementIterator, Token},
+};
 
-use super::{ASTExpression, ASTExpressionIterator};
+use super::{ASTExpression, ASTExpressionIterator, ExpressionError};
 
 /// All binary operators. Each variant represents a different operation. The associated token is
 /// a keyword token that generated the operator.
@@ -175,5 +178,37 @@ impl BinaryOperation {
     /// Returns an iterator over the tokens used to generate this
     pub fn tokens<'a>(&'a self) -> BinaryOperationIterator<'a> {
         BinaryOperationIterator::new(self)
+    }
+
+    pub(crate) fn parse(
+        operator: BinaryOpt,
+        tokens: &mut StatementIterator,
+    ) -> Result<ASTExpression, ASTErrorType> {
+        let left_first_token = match tokens.next() {
+            None => {
+                return Err(ASTErrorType::from(ExpressionError::MissingOperands(
+                    operator.into_token(),
+                )))
+            }
+            Some(token) => token,
+        };
+        let left = ASTExpression::parse(left_first_token, tokens)?;
+        let an_token =
+            tokens.next_if(|token| matches!(token.token_type, TokenType::Keyword(Keywords::AN)));
+        let right_first_token = match tokens.next() {
+            None => {
+                return Err(ASTErrorType::from(ExpressionError::MissingOperands(
+                    operator.into_token(),
+                )))
+            }
+            Some(token) => token,
+        };
+        let right = ASTExpression::parse(right_first_token, tokens)?;
+        Ok(ASTExpression::BinaryOperation(BinaryOperation {
+            operator,
+            left: Box::new(left),
+            right: Box::new(right),
+            an_token,
+        }))
     }
 }

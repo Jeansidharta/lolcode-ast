@@ -308,48 +308,48 @@ impl ASTExpression {
                 match keyword {
                     // Boolean operations
                     Keywords::BOTH_OF => {
-                        parse_binary_expression(BinaryOpt::BothOf(first_token), tokens)
+                        BinaryOperation::parse(BinaryOpt::BothOf(first_token), tokens)
                     }
                     Keywords::EITHER_OF => {
-                        parse_binary_expression(BinaryOpt::EitherOf(first_token), tokens)
+                        BinaryOperation::parse(BinaryOpt::EitherOf(first_token), tokens)
                     }
                     Keywords::WON_OF => {
-                        parse_binary_expression(BinaryOpt::WonOf(first_token), tokens)
+                        BinaryOperation::parse(BinaryOpt::WonOf(first_token), tokens)
                     }
-                    Keywords::NOT => parse_unary_expression(UnaryOpt::Not(first_token), tokens),
-                    Keywords::ALL_OF => parse_nary_expression(NaryOpt::AllOf(first_token), tokens),
-                    Keywords::ANY_OF => parse_nary_expression(NaryOpt::AnyOf(first_token), tokens),
+                    Keywords::NOT => UnaryOperation::parse(UnaryOpt::Not(first_token), tokens),
+                    Keywords::ALL_OF => NaryOperation::parse(NaryOpt::AllOf(first_token), tokens),
+                    Keywords::ANY_OF => NaryOperation::parse(NaryOpt::AnyOf(first_token), tokens),
                     // Math operations
                     Keywords::SUM_OF => {
-                        parse_binary_expression(BinaryOpt::SumOf(first_token), tokens)
+                        BinaryOperation::parse(BinaryOpt::SumOf(first_token), tokens)
                     }
                     Keywords::DIFF_OF => {
-                        parse_binary_expression(BinaryOpt::DiffOf(first_token), tokens)
+                        BinaryOperation::parse(BinaryOpt::DiffOf(first_token), tokens)
                     }
                     Keywords::PRODUKT_OF => {
-                        parse_binary_expression(BinaryOpt::ProduktOf(first_token), tokens)
+                        BinaryOperation::parse(BinaryOpt::ProduktOf(first_token), tokens)
                     }
                     Keywords::QUOSHUNT_OF => {
-                        parse_binary_expression(BinaryOpt::QuoshuntOf(first_token), tokens)
+                        BinaryOperation::parse(BinaryOpt::QuoshuntOf(first_token), tokens)
                     }
                     Keywords::MOD_OF => {
-                        parse_binary_expression(BinaryOpt::ModOf(first_token), tokens)
+                        BinaryOperation::parse(BinaryOpt::ModOf(first_token), tokens)
                     }
                     // Comparison operations
                     Keywords::BIGGR_OF => {
-                        parse_binary_expression(BinaryOpt::BiggrOf(first_token), tokens)
+                        BinaryOperation::parse(BinaryOpt::BiggrOf(first_token), tokens)
                     }
                     Keywords::SMALLR_OF => {
-                        parse_binary_expression(BinaryOpt::SmallrOf(first_token), tokens)
+                        BinaryOperation::parse(BinaryOpt::SmallrOf(first_token), tokens)
                     }
                     Keywords::BOTH_SAEM => {
-                        parse_binary_expression(BinaryOpt::BothSaem(first_token), tokens)
+                        BinaryOperation::parse(BinaryOpt::BothSaem(first_token), tokens)
                     }
                     Keywords::DIFFRINT => {
-                        parse_binary_expression(BinaryOpt::Diffrint(first_token), tokens)
+                        BinaryOperation::parse(BinaryOpt::Diffrint(first_token), tokens)
                     }
                     // String concat operation
-                    Keywords::SMOOSH => parse_nary_expression(NaryOpt::Smoosh(first_token), tokens),
+                    Keywords::SMOOSH => NaryOperation::parse(NaryOpt::Smoosh(first_token), tokens),
                     // Type Cast operation
                     Keywords::MAEK => todo!(),
 
@@ -359,72 +359,4 @@ impl ASTExpression {
             _ => Err(ASTErrorType::UnexpectedToken(first_token)),
         }
     }
-}
-
-fn parse_binary_expression(
-    operator: BinaryOpt,
-    tokens: &mut StatementIterator,
-) -> Result<ASTExpression, ASTErrorType> {
-    let left_first_token = match tokens.next() {
-        None => {
-            return Err(ASTErrorType::from(ExpressionError::MissingOperands(
-                operator.into_token(),
-            )))
-        }
-        Some(token) => token,
-    };
-    let left = ASTExpression::parse(left_first_token, tokens)?;
-    let an_token =
-        tokens.next_if(|token| matches!(token.token_type, TokenType::Keyword(Keywords::AN)));
-    let right_first_token = match tokens.next() {
-        None => {
-            return Err(ASTErrorType::from(ExpressionError::MissingOperands(
-                operator.into_token(),
-            )))
-        }
-        Some(token) => token,
-    };
-    let right = ASTExpression::parse(right_first_token, tokens)?;
-    Ok(ASTExpression::BinaryOperation(BinaryOperation {
-        operator,
-        left: Box::new(left),
-        right: Box::new(right),
-        an_token,
-    }))
-}
-
-fn parse_unary_expression(
-    operator: UnaryOpt,
-    tokens: &mut StatementIterator,
-) -> Result<ASTExpression, ASTErrorType> {
-    let first_token = match tokens.next() {
-        None => {
-            return Err(ASTErrorType::from(ExpressionError::MissingOperands(
-                operator.into_token(),
-            )))
-        }
-        Some(token) => token,
-    };
-    Ok(ASTExpression::UnaryOperation(UnaryOperation {
-        operator,
-        expression: Box::new(ASTExpression::parse(first_token, tokens)?),
-    }))
-}
-
-fn parse_nary_expression(
-    operator: NaryOpt,
-    tokens: &mut StatementIterator,
-) -> Result<ASTExpression, ASTErrorType> {
-    let mut expressions = Vec::new();
-    while let Some(token) = tokens.next_if_token_type_ne(TokenType::Keyword(Keywords::MKAY)) {
-        let operand = ASTExpression::parse(token, tokens)?;
-        let an_token = tokens.next_if_token_type_eq(TokenType::Keyword(Keywords::AN));
-        expressions.push(NaryOperationOperand { operand, an_token });
-    }
-    let mkay_token = tokens.next();
-    Ok(ASTExpression::NaryOperation(NaryOperation {
-        operator,
-        expressions,
-        mkay_token,
-    }))
 }

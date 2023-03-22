@@ -1,4 +1,7 @@
-use crate::parser::Token;
+use crate::{
+    lexer::{Keywords, TokenType},
+    parser::{error::ASTErrorType, statement_iterator::StatementIterator, Token},
+};
 
 use super::{ASTExpression, ASTExpressionIterator};
 
@@ -160,5 +163,23 @@ impl NaryOperation {
     /// Returns an iterator over the tokens used to generate this
     pub fn tokens<'a>(&'a self) -> NaryOperationIterator<'a> {
         NaryOperationIterator::new(self)
+    }
+
+    pub(crate) fn parse(
+        operator: NaryOpt,
+        tokens: &mut StatementIterator,
+    ) -> Result<ASTExpression, ASTErrorType> {
+        let mut expressions = Vec::new();
+        while let Some(token) = tokens.next_if_token_type_ne(TokenType::Keyword(Keywords::MKAY)) {
+            let operand = ASTExpression::parse(token, tokens)?;
+            let an_token = tokens.next_if_token_type_eq(TokenType::Keyword(Keywords::AN));
+            expressions.push(NaryOperationOperand { operand, an_token });
+        }
+        let mkay_token = tokens.next();
+        Ok(ASTExpression::NaryOperation(NaryOperation {
+            operator,
+            expressions,
+            mkay_token,
+        }))
     }
 }

@@ -1,6 +1,6 @@
-use crate::parser::Token;
+use crate::parser::{error::ASTErrorType, statement_iterator::StatementIterator, Token};
 
-use super::{ASTExpression, ASTExpressionIterator};
+use super::{ASTExpression, ASTExpressionIterator, ExpressionError};
 
 /// All unary operators. Each variant represents a different operation. The associated token is
 /// a keyword token that generated the operator.
@@ -84,5 +84,23 @@ impl UnaryOperation {
     /// Returns an iterator over the tokens used to generate this
     pub fn tokens<'a>(&'a self) -> UnaryOperationIterator<'a> {
         UnaryOperationIterator::new(self)
+    }
+
+    pub(crate) fn parse(
+        operator: UnaryOpt,
+        tokens: &mut StatementIterator,
+    ) -> Result<ASTExpression, ASTErrorType> {
+        let first_token = match tokens.next() {
+            None => {
+                return Err(ASTErrorType::from(ExpressionError::MissingOperands(
+                    operator.into_token(),
+                )))
+            }
+            Some(token) => token,
+        };
+        Ok(ASTExpression::UnaryOperation(UnaryOperation {
+            operator,
+            expression: Box::new(ASTExpression::parse(first_token, tokens)?),
+        }))
     }
 }
