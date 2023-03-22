@@ -8,9 +8,9 @@ use crate::parser::StatementIterator;
 #[derive(Debug, Clone, PartialEq)]
 pub struct VariableAssignment {
     /// The variable that will receive the value
-    pub variable_access: VariableAccess,
+    pub(crate) variable_access: VariableAccess,
     /// The value that will be put in the variable
-    pub expression: ASTExpression,
+    pub(crate) expression: ASTExpression,
 
     pub(crate) r_token: Token,
 }

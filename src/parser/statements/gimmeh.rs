@@ -12,8 +12,8 @@ use crate::parser::StatementIterator;
 /// ```
 #[derive(Debug, PartialEq, Clone)]
 pub struct Gimmeh {
-    gimmeh_token: Token,
-    variable_access: VariableAccess,
+    pub(crate) gimmeh_token: Token,
+    pub(crate) variable_access: VariableAccess,
 }
 
 impl Gimmeh {

@@ -10,13 +10,13 @@ use crate::parser::blocks::{parse_block_function, ASTBlock};
 /// A `HOW IZ I` statement, which is used to define a function.
 #[derive(Clone, Debug, PartialEq)]
 pub struct HowIzI {
-    how_iz_i_token: Token,
+    pub(crate) how_iz_i_token: Token,
     /// The function name
-    pub name: Identifier,
+    pub(crate) name: Identifier,
     /// A list of the function's arguments
-    pub arguments: VecDeque<Identifier>,
+    pub(crate) arguments: VecDeque<Identifier>,
     /// The function's body
-    pub body: ASTBlock,
+    pub(crate) body: ASTBlock,
 }
 
 /// Errors that can only happen when parsing a `HOW IZ I` statement

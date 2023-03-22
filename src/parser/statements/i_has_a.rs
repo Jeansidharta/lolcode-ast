@@ -8,7 +8,7 @@ use crate::parser::StatementIterator;
 
 /// When defining a variable, it can either be initialized by value, or by type.
 #[derive(Debug, PartialEq, Clone)]
-pub enum IHasAInitialValue {
+pub(crate) enum IHasAInitialValue {
     /// The variable is initialized by a value, which is the result of the given expression
     Expression(ASTExpression),
     /// The variable is initialized by type.
@@ -32,9 +32,9 @@ pub enum IHasAError {
 pub struct IHasA {
     pub(crate) i_has_a_token: Token,
     /// The variable that'll be defined
-    pub identifier: Identifier,
+    pub(crate) identifier: Identifier,
     /// The variable's initial value or type
-    pub initial_value: Option<IHasAInitialValue>,
+    pub(crate) initial_value: Option<IHasAInitialValue>,
 }
 
 impl IHasA {

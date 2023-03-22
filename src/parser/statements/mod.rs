@@ -24,7 +24,6 @@ use crate::parser::StatementIterator;
 pub mod assignment;
 /// Assign a value to a bukkit's slot. Ex: `var HAS A slot_name ITZ "some_value"`
 pub mod bukkit_set_slot;
-pub(crate) mod error_type;
 /// Returs a value from within a function. Ex: `FOUND YR "some_value"`
 pub mod found_yr;
 /// Reads user input into a variable. Ex: `GIMMEH var`

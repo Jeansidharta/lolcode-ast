@@ -64,7 +64,7 @@ pub enum ImInYrError {
 
 #[derive(Debug, PartialEq, Clone)]
 /// The operation used in the loop.
-pub enum LoopOperation {
+pub(crate) enum LoopOperation {
     /// Will add one to the operand on every iteration
     UPPIN(Token),
     /// Will subract one to the operand on every iteration
@@ -82,7 +82,7 @@ impl Into<Token> for LoopOperation {
 
 /// The condition used in the loop.
 #[derive(Debug, PartialEq, Clone)]
-pub enum LoopCondition {
+pub(crate) enum LoopCondition {
     /// Will loop until the given expression is WIN (true)
     TIL(ASTExpression),
     /// Will loop while the given expression is WIN (true)
@@ -91,11 +91,11 @@ pub enum LoopCondition {
 
 #[derive(Debug, PartialEq, Clone)]
 /// The operation provided for the loop after the label.
-pub struct LoopIterationOperation {
+pub(crate) struct LoopIterationOperation {
     /// The operation token
-    pub operation: LoopOperation,
+    pub(crate) operation: LoopOperation,
     /// The operand
-    pub operand: VariableAccess,
+    pub(crate) operand: VariableAccess,
 }
 
 /// A statement that will start a loop. This can have 4 forms:
@@ -128,15 +128,15 @@ pub struct LoopIterationOperation {
 pub struct ImInYr {
     pub(crate) im_in_yr_token: Token,
     /// The label provided. Can be any identifier token
-    pub label: Token,
+    pub(crate) label: Token,
     /// The operation that will run on every iteration
-    pub on_iteration: Option<LoopIterationOperation>,
+    pub(crate) on_iteration: Option<LoopIterationOperation>,
     /// The condition expression that will determine if a there will be a next loop iteration
-    pub condition: Option<LoopCondition>,
+    pub(crate) condition: Option<LoopCondition>,
     /// The statements inside the loop.
-    pub code_block: ASTBlock,
+    pub(crate) code_block: ASTBlock,
     /// The label after the loop closing block
-    pub end_label: Token,
+    pub(crate) end_label: Token,
 }
 
 impl ImInYr {

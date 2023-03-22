@@ -10,13 +10,13 @@ use crate::parser::expression::ASTExpression;
 /// An `I IZ` statement, which is a function call
 #[derive(Debug, Clone, PartialEq)]
 pub struct IIz {
-    i_iz_token: Token,
+    pub(crate) i_iz_token: Token,
     /// The name of the function. Note that this is of type VariableAccess, which means it can not
     /// only be an identifier, but it can also be a bukkit access, and the function should be
     /// placed inside the bukkit.
-    pub name: VariableAccess,
+    pub(crate) name: VariableAccess,
     /// A list of the arguments passed to the function.
-    pub arguments: VecDeque<ASTExpression>,
+    pub(crate) arguments: VecDeque<ASTExpression>,
 }
 
 /// Errors that can only happen in a `I IZ` statement

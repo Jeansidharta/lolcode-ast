@@ -12,11 +12,11 @@ use super::assignment::VariableAssignmentError;
 #[derive(Clone, Debug, PartialEq)]
 pub struct BukkitSetSlot {
     /// The bukkit whose slot will be set
-    pub bukkit: VariableAccess,
+    pub(crate) bukkit: VariableAccess,
     /// The bukkit's slot
-    pub slot_name: Identifier,
+    pub(crate) slot_name: Identifier,
     /// The value that'll be put
-    pub value: ASTExpression,
+    pub(crate) value: ASTExpression,
 }
 
 impl BukkitSetSlot {

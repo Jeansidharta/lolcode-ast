@@ -7,7 +7,7 @@ use crate::parser::StatementIterator;
 /// A HAI "statement"
 #[derive(Debug, Clone, PartialEq)]
 pub struct Hai {
-    hai_token: Token,
+    pub(crate) hai_token: Token,
     pub(crate) version: VecDeque<Token>,
 }
 
