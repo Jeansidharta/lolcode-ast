@@ -84,7 +84,7 @@ impl Keywords {
     /// let keyword = Keywords::I_HAS_A;
     /// assert_eq!(keyword.into_str(), "I HAS A")
     /// ```
-    pub fn into_str(&self) -> &'static str {
-        return self.into();
+    pub fn to_string_slice(&self) -> &'static str {
+        <Keywords as crate::to_string_slice::ToStringSlice>::to_string_slice(self)
     }
 }

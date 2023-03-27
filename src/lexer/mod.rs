@@ -40,10 +40,15 @@ fn parse_number(code: &str) -> Option<(&str, NumberToken)> {
 fn parse_keyword(code: &str) -> Option<(&str, Keywords)> {
     Keywords::iter()
         .find(|keyword| {
-            let keyword_str: &str = keyword.into_str();
+            let keyword_str: &str = keyword.to_string_slice();
             code.starts_with(keyword_str)
         })
-        .and_then(|keyword| Some((&code[0..keyword.into_str().len()], (*keyword).clone())))
+        .and_then(|keyword| {
+            Some((
+                &code[0..keyword.to_string_slice().len()],
+                (*keyword).clone(),
+            ))
+        })
 }
 
 fn parse_identifier(code: &str) -> Option<&str> {
@@ -126,8 +131,8 @@ fn parse_ellipsis(code: &str) -> Option<&str> {
 }
 
 fn parse_boolean(code: &str) -> Option<(&str, bool)> {
-    let true_str = Keywords::WIN.into_str();
-    let false_str = Keywords::FAIL.into_str();
+    let true_str = Keywords::WIN.to_string_slice();
+    let false_str = Keywords::FAIL.to_string_slice();
 
     if code.starts_with(true_str) {
         Some((&code[..true_str.len()], true))
@@ -139,7 +144,7 @@ fn parse_boolean(code: &str) -> Option<(&str, bool)> {
 }
 
 fn parse_noob(code: &str) -> Option<&str> {
-    let noob_str = Keywords::NOOB.into_str();
+    let noob_str = Keywords::NOOB.to_string_slice();
 
     if code.starts_with(noob_str) {
         Some(&code[..noob_str.len()])
@@ -149,7 +154,7 @@ fn parse_noob(code: &str) -> Option<&str> {
 }
 
 fn parse_single_line_comment(code: &str) -> Option<(&str, String)> {
-    let btw_str = Keywords::BTW.into_str();
+    let btw_str = Keywords::BTW.to_string_slice();
 
     if code.starts_with(btw_str) {
         let end_len_bytes = code.find('\n').unwrap_or(code.len());
@@ -161,8 +166,8 @@ fn parse_single_line_comment(code: &str) -> Option<(&str, String)> {
 }
 
 fn parse_multi_line_comment(code: &str) -> Result<Option<(&str, String)>, ()> {
-    let obtw_str = Keywords::OBTW.into_str();
-    let tldr_str = Keywords::TLDR.into_str();
+    let obtw_str = Keywords::OBTW.to_string_slice();
+    let tldr_str = Keywords::TLDR.to_string_slice();
 
     if code.starts_with(obtw_str) {
         let end_len_bytes = match code.find(tldr_str) {

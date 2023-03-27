@@ -13,6 +13,7 @@ pub mod parser;
 
 pub use lexer::tokenize;
 pub use parser::parse;
+mod to_string_slice;
 
 /// Tokenize and then generate an AST for the given LOLCODE string.
 ///
