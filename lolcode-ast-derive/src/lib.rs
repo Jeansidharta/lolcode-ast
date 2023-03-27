@@ -1,29 +1,19 @@
-use proc_macro2::{self, TokenStream, TokenTree};
+use proc_macro::TokenStream;
 use quote::quote;
+use syn::{parse_macro_input, DeriveInput};
 
 #[proc_macro_derive(ToStringSlice)]
-pub fn derive_to_string_slice(tokens: proc_macro::TokenStream) -> proc_macro::TokenStream {
-    let tokens = TokenStream::from(tokens);
-    let mut tokens_iter = tokens
-        .into_iter()
-        .skip_while(
-            |token| !matches!( token, TokenTree::Ident(ident) if ident.to_string() == "enum"),
-        )
-        .skip(1);
+pub fn derive_to_string_slice(tokens: TokenStream) -> TokenStream {
+    let input = parse_macro_input!(tokens as DeriveInput);
+    let enum_name = input.ident;
+    let enum_variants = match input.data {
+        syn::Data::Enum(syn::DataEnum { variants, .. }) => variants,
+        _ => {
+            return quote! { compile_error!("Proc macro ToStringSlice can only be implemented to enums") }.into()
+        }
+    }.into_iter();
 
-    let enum_name: TokenStream = tokens_iter.next().unwrap().into();
-
-    let names_with_underscore = tokens_iter
-        .find_map(|token| match token {
-            TokenTree::Group(group) => Some(group.stream()),
-            _ => None,
-        })
-        .unwrap()
-        .into_iter()
-        .filter_map(|token| match token {
-            TokenTree::Ident(ident) => Some(ident),
-            _ => None,
-        });
+    let names_with_underscore = enum_variants.map(|variant| variant.ident);
 
     let names_with_spaces = names_with_underscore
         .clone()
@@ -41,40 +31,31 @@ pub fn derive_to_string_slice(tokens: proc_macro::TokenStream) -> proc_macro::To
 }
 
 #[proc_macro_derive(IterableEnum)]
-pub fn derive_iterable_enum(tokens: proc_macro::TokenStream) -> proc_macro::TokenStream {
-    let mut tokens_iter = TokenStream::from(tokens)
-        .into_iter()
-        .skip_while(|token| match token {
-            TokenTree::Ident(ident) => ident.to_string() != "enum",
-            _ => true,
-        });
+pub fn derive_iterable_enum(tokens: TokenStream) -> TokenStream {
+    let input = parse_macro_input!(tokens as DeriveInput);
+    let enum_name = input.ident;
 
-    let enum_name = tokens_iter.nth(1).unwrap();
+    let enum_variants = match input.data {
+        syn::Data::Enum(syn::DataEnum { variants, .. }) => variants,
+        _ => {
+            return quote! { compile_error!("Proc macro IterableEnum can only be implemented to enums") }.into()
+        }
+    }.into_iter();
 
-    let idents = tokens_iter
-        .find_map(|token| match token {
-            TokenTree::Group(group) => Some(group.stream()),
-            _ => None,
-        })
-        .unwrap()
-        .into_iter()
-        .filter_map(|token| match token {
-            TokenTree::Ident(ident) => Some(ident),
-            _ => None,
-        });
+    let idents = enum_variants.map(|variant| variant.ident);
 
     let idents_len = idents.clone().count();
 
     quote!(
-    const ALL_SYMBOLS: [#enum_name; #idents_len] = [
-        #(#enum_name::#idents),*
-    ];
+        const ALL_SYMBOLS: [#enum_name; #idents_len] = [
+            #(#enum_name::#idents),*
+        ];
 
-    impl #enum_name {
-        pub(crate) fn iter() -> std::slice::Iter<'static, #enum_name> {
-            ALL_SYMBOLS.iter()
+        impl #enum_name {
+            pub(crate) fn iter() -> std::slice::Iter<'static, #enum_name> {
+                ALL_SYMBOLS.iter()
+            }
         }
-    }
-        )
+    )
     .into()
 }
